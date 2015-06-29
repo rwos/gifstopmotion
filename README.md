@@ -1,0 +1,4 @@
+gifstopmotion
+-------------
+
+Needs polish.
