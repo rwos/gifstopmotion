@@ -2,6 +2,11 @@ all: build
 
 build: index.html
 
+deploy:
+	git checkout gh-pages
+	git pull origin master
+	git push origin gh-pages
+
 index.html: src/index.html src/main.js src/main.css 3rd/gifjs
 	mkdir -p www
 	sed -e '/<JSHEREPLZ>/{r 3rd/gifjs/dist/gif.js' \
