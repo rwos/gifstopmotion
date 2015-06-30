@@ -152,18 +152,65 @@
 })();
     </script>
     <style>
+/*
+EFECCA
+A7A37E
+E6E2AF
+046380
+002F2F
+*/
+
+html {
+    background: #046380;
+    color: #EFECCA;
+    font-family: sans;
+    font-size: 18px;
+}
+
 video, img {
-    border: 1px solid black;
+    border: none;
+    border-radius: 4px;
+}
+
+button {
+    border: none;
+    color: #EFECCA;
+    background: #046380;
+    font-size: 18px;
+}
+button:hover {
+    background: #EFECCA;
+    color: #046380;
+}
+
+.overlay {
+    margin-left: 20px;
+    display: inline-block;
+    position: relative;
+}
+.overlay > .fg {
+    z-index: 2;
+}
+.overlay > .bg {
+    position: absolute;
+    top: 100px;
+    left: 85px;
+    width: 200px;
+    z-index: -999;
 }
     </style>
   </head>
 
   <body>
-    <img id="preview" src="data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==">
-    <video id="viewfinder" style="max-width: 100%">Please browser your update.</video>
+    <div>
+      <video id="viewfinder" style="max-width: 100%">Please browser your update.</video>
+      <div class="overlay">
+        <img class="fg" id="preview" src="data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==">
+        <div class="bg">press space a lot</div>
+      </div>
+    </div>
     <canvas id="tmp" style="display:none"></canvas>
     <br>
-    <FONT COLOR=DARKBLUE>press space a lot</FONT>
     <button id="clear">start over</button>
     <br><br><br><br>
     <a href="https://github.com/rwos/gifstopmotion">contribute</a>

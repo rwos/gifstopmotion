@@ -18,11 +18,15 @@
   </head>
 
   <body>
-    <img id="preview" src="data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==">
-    <video id="viewfinder" style="max-width: 100%">Please browser your update.</video>
+    <div>
+      <video id="viewfinder" style="max-width: 100%">Please browser your update.</video>
+      <div class="overlay">
+        <img class="fg" id="preview" src="data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==">
+        <div class="bg">press space a lot</div>
+      </div>
+    </div>
     <canvas id="tmp" style="display:none"></canvas>
     <br>
-    <FONT COLOR=DARKBLUE>press space a lot</FONT>
     <button id="clear">start over</button>
     <br><br><br><br>
     <a href="https://github.com/rwos/gifstopmotion">contribute</a>
