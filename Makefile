@@ -2,11 +2,12 @@ all: build
 
 build: index.html
 
-index.html: src/index.html src/main.js 3rd/gifjs
+index.html: src/index.html src/main.js src/main.css 3rd/gifjs
 	mkdir -p www
 	sed -e '/<JSHEREPLZ>/{r 3rd/gifjs/dist/gif.js' \
 		-e 'r src/main.js' -e 'd}' \
 		-e '/<WORKERJSHEREPLZ>/{r 3rd/gifjs/dist/gif.worker.js' -e 'd}' \
+		-e '/<CSSHEREPLZ>/{r src/main.css' -e 'd}' \
 		$< > $@
 
 3rd/gifjs:
