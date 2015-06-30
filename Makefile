@@ -1,11 +1,11 @@
 all: build
 
-build: www/index.html
+build: index.html
 
-www/index.html: index.html main.js 3rd/gifjs
+index.html: src/index.html src/main.js 3rd/gifjs
 	mkdir -p www
 	sed -e '/<JSHEREPLZ>/{r 3rd/gifjs/dist/gif.js' \
-		-e 'r main.js' -e 'd}' \
+		-e 'r src/main.js' -e 'd}' \
 		-e '/<WORKERJSHEREPLZ>/{r 3rd/gifjs/dist/gif.worker.js' -e 'd}' \
 		$< > $@
 
@@ -17,4 +17,4 @@ www/index.html: index.html main.js 3rd/gifjs
 
 run:
 	xdg-open localhost:8000 || open localhost:8000
-	php -S localhost:8000 -t www
+	php -S localhost:8000 -t ./
