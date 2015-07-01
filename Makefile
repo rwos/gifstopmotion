@@ -9,6 +9,7 @@ deploy:
 	git checkout gh-pages
 	git pull origin master
 	git push origin gh-pages
+	git checkout master
 
 index.html: src/index.html src/main.js src/main.css 3rd/gifjs
 	mkdir -p www
