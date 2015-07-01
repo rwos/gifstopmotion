@@ -1,9 +1,11 @@
 /*
-EFECCA
-A7A37E
-E6E2AF
-046380
-002F2F
+    https://color.adobe.com/sandy-stone-beach-ocean-diver-color-theme-15325
+
+    EFECCA
+    A7A37E
+    E6E2AF
+    046380
+    002F2F
 */
 
 html {
@@ -35,8 +37,12 @@ button {
     color: #EFECCA;
     background: #046380;
     font-size: 18px;
+    transition: background 0.4s, color 0.4s, transform 0.2s;
+    cursor: pointer;
 }
 button:hover {
+    transform: rotate(-3deg);
+    rotation: 20deg;
     background: #EFECCA;
     color: #046380;
 }
@@ -63,4 +69,31 @@ tr, td {
 
 .main, .main * .overlay, .main * img, .main * video {
     width: 100%;
+}
+
+.hover {
+    opacity: 0;
+    transition: opacity 0.4s, top 0.2s;
+    position: absolute;
+    background: #002F2F;
+    top: -10px;
+    width: 100%;
+    padding: 20px 0;
+    text-align: center;
+}
+
+img:hover + .hover, .hover:hover {
+    top: 50%;
+    opacity: 0.9;
+    display: block;
+}
+
+.hover > button + button {
+    margin-left: 40px;
+}
+
+.hover > button {
+    opacity: 1 ;
+    padding: 10px 20px;
+    border-radius: 2px;
 }

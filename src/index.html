@@ -28,6 +28,10 @@
           <div>
             <div class="overlay">
               <img class="fg" id="preview" src="data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==">
+              <div class="hover">
+                <button id="save">download</button>
+                <button id="clear">start over</button>
+              </div>
               <div class="bg">press space a lot</div>
             </div>
           </div>
@@ -35,12 +39,9 @@
         </td>
       </tr>
     </table>
-    <button id="clear">start over</button>
+    <input style="display: none" id="delay" type="range" min="10" max="500" step="10" value="200"></input>
+    <!--
     <a href="https://github.com/rwos/gifstopmotion">contribute</a>
-    <br><br><br><br>
-    <br><br><br><br>
-    <br><br><br><br>
-    <input id="delay" type="range" min="10" max="500" step="10" value="200"></input>
-    <FONT COLOR=DARKYELLOW>&lt;-- don't use this</FONT>
+    -->
   </body>
 </html>
