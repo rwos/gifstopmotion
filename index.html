@@ -58,8 +58,7 @@
             clear();
             ev.preventDefault();
         });
-        preview.addEventListener('click', function(ev) {
-            // XXX: this isn't exactly obvious
+        document.getElementById('save').addEventListener('click', function(ev) {
             download();
             ev.preventDefault();
         });
@@ -90,12 +89,8 @@
             if (isNaN(height)) { // FF bug, apparently
                 height = width / (4/3);
             }
-            video.setAttribute('width', width);
-            video.setAttribute('height', height);
             canvas.setAttribute('width', width);
             canvas.setAttribute('height', height);
-            preview.setAttribute('width', width);
-            preview.setAttribute('height', height);
             streaming = true;
         }, false);
 
@@ -153,11 +148,13 @@
     </script>
     <style>
 /*
-EFECCA
-A7A37E
-E6E2AF
-046380
-002F2F
+    https://color.adobe.com/sandy-stone-beach-ocean-diver-color-theme-15325
+
+    EFECCA
+    A7A37E
+    E6E2AF
+    046380
+    002F2F
 */
 
 html {
@@ -165,6 +162,18 @@ html {
     color: #EFECCA;
     font-family: sans;
     font-size: 18px;
+}
+
+html, body, table, td {
+    padding: 0;
+    margin: 0;
+    border: none;
+    border-spacing: 0;
+    border-collapse: collapse;
+}
+
+video {
+    display: inline-block;
 }
 
 video, img {
@@ -177,14 +186,17 @@ button {
     color: #EFECCA;
     background: #046380;
     font-size: 18px;
+    transition: background 0.4s, color 0.4s, transform 0.2s;
+    cursor: pointer;
 }
 button:hover {
+    transform: rotate(-3deg);
+    rotation: 20deg;
     background: #EFECCA;
     color: #046380;
 }
 
 .overlay {
-    margin-left: 20px;
     display: inline-block;
     position: relative;
 }
@@ -198,26 +210,70 @@ button:hover {
     width: 200px;
     z-index: -999;
 }
+
+tr, td {
+    vertical-align: top;
+    min-height: 500px;
+}
+
+.main, .main * .overlay, .main * img, .main * video {
+    width: 100%;
+}
+
+.hover {
+    opacity: 0;
+    transition: opacity 0.4s, top 0.2s;
+    position: absolute;
+    background: #002F2F;
+    top: -10px;
+    width: 100%;
+    padding: 20px 0;
+    text-align: center;
+}
+
+img:hover + .hover, .hover:hover {
+    top: 50%;
+    opacity: 0.9;
+    display: block;
+}
+
+.hover > button + button {
+    margin-left: 40px;
+}
+
+.hover > button {
+    opacity: 1 ;
+    padding: 10px 20px;
+    border-radius: 2px;
+}
     </style>
   </head>
 
   <body>
-    <div>
-      <video id="viewfinder" style="max-width: 100%">Please browser your update.</video>
-      <div class="overlay">
-        <img class="fg" id="preview" src="data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==">
-        <div class="bg">press space a lot</div>
-      </div>
-    </div>
     <canvas id="tmp" style="display:none"></canvas>
-    <br>
-    <button id="clear">start over</button>
-    <br><br><br><br>
+    <table class="main">
+      <tr>
+        <td width="50%">
+          <video id="viewfinder">Please browser your update.</video>
+        </td>
+        <td width="50%">
+          <div>
+            <div class="overlay">
+              <img class="fg" id="preview" src="data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==">
+              <div class="hover">
+                <button id="save">download</button>
+                <button id="clear">start over</button>
+              </div>
+              <div class="bg">press space a lot</div>
+            </div>
+          </div>
+          <br>
+        </td>
+      </tr>
+    </table>
+    <input style="display: none" id="delay" type="range" min="10" max="500" step="10" value="200"></input>
+    <!--
     <a href="https://github.com/rwos/gifstopmotion">contribute</a>
-    <br><br><br><br>
-    <br><br><br><br>
-    <br><br><br><br>
-    <input id="delay" type="range" min="10" max="500" step="10" value="200"></input>
-    <FONT COLOR=DARKYELLOW>&lt;-- don't use this</FONT>
+    -->
   </body>
 </html>

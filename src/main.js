@@ -39,8 +39,7 @@
             clear();
             ev.preventDefault();
         });
-        preview.addEventListener('click', function(ev) {
-            // XXX: this isn't exactly obvious
+        document.getElementById('save').addEventListener('click', function(ev) {
             download();
             ev.preventDefault();
         });
@@ -71,12 +70,8 @@
             if (isNaN(height)) { // FF bug, apparently
                 height = width / (4/3);
             }
-            video.setAttribute('width', width);
-            video.setAttribute('height', height);
             canvas.setAttribute('width', width);
             canvas.setAttribute('height', height);
-            preview.setAttribute('width', width);
-            preview.setAttribute('height', height);
             streaming = true;
         }, false);
 

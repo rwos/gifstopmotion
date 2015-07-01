@@ -2,6 +2,9 @@ all: build
 
 build: index.html
 
+watch:
+	while true; do $(MAKE) build ; sleep 0.5; done
+
 deploy:
 	git checkout gh-pages
 	git pull origin master
