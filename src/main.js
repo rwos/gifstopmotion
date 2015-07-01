@@ -20,6 +20,7 @@
     var video = null;
     var canvas = null;
     var preview = null;
+    var text = null;
 
     var workerblob = new Blob([document.getElementById('workerscript').textContent], {type: "text/javascript"});
 
@@ -35,6 +36,7 @@
         video = document.getElementById('viewfinder');
         canvas = document.getElementById('tmp');
         preview = document.getElementById('preview');
+        text = document.getElementById('text');
         document.getElementById('clear').addEventListener('click', function(ev) {
             clear();
             ev.preventDefault();
@@ -76,6 +78,9 @@
         }, false);
 
         document.body.addEventListener('keydown', function(ev){
+            if (ev.target.nodeName === 'TEXTAREA') {
+                return; // ignore
+            }
             if (ev.charCode === 32 || ev.keyCode === 32) {
                 addframe();
                 ev.preventDefault();
@@ -114,9 +119,14 @@
             canvas.width = width;
             canvas.height = height;
             context.drawImage(video, 0, 0, width, height);
+            context.textAlign = 'center';
+            context.font = "24px serif";
+            context.fillStyle = 'white';
+            context.fillText(text.value, width/2, height-24);
 
             gif.addFrame(clonecanvas(canvas), {delay: delay});
             gif.on('finished', function(blob) {
+                preview.removeAttribute('height');
                 preview.src = URL.createObjectURL(blob);
                 gif.abort();
             });
