@@ -41,7 +41,7 @@
     var preview = null;
     var text = null;
 
-    var workerblob = new Blob([document.getElementById('workerscript').textContent], {type: "text/javascript"});
+    var workerblob = new Blob([document.getElementById('workerscript').textContent], {type: 'text/javascript'});
 
     var gif = new GIF({
         quality: 10,
@@ -139,9 +139,11 @@
             canvas.height = height;
             context.drawImage(video, 0, 0, width, height);
             context.textAlign = 'center';
-            context.font = "24px serif";
+            context.font = 'bold 24px sans';
             context.fillStyle = 'white';
+            context.strokeStyle = '1px solid black';
             context.fillText(text.value, width/2, height-24);
+            context.strokeText(text.value, width/2, height-24);
 
             gif.addFrame(clonecanvas(canvas), {delay: delay});
             gif.on('finished', function(blob) {
