@@ -263,21 +263,23 @@ img:hover + .hover, .hover:hover {
 }
 
 #text {
+    box-sizing: border-box;
     width: 100%;
     border: none;
     min-height: 80px;
     font-size: 40px;
-    box-sizing: border-box;
     padding: 10px 20px;
     background: #046380;
-    transition: background 0.4s;
+    border: 4px solid #046380;
+    transition: background 0.4s, border 0.4s;
     border-radius: 4px;
 }
 #text:hover {
-    background: #A7A37E
+    border: 4px solid #EFECCA;
 }
 #text:focus {
     background: #EFECCA;
+    border: 4px solid #EFECCA;
 }
     </style>
   </head>
@@ -308,7 +310,7 @@ img:hover + .hover, .hover:hover {
         </td>
       </tr>
     </table>
-    <textarea id="text" placeholder="text (optional)"></textarea>
+    <textarea id="text" placeholder="caption (optional)"></textarea>
     <input style="display: none" id="delay" type="range" min="10" max="500" step="10" value="200"></input>
     <!--
     <a href="https://github.com/rwos/gifstopmotion">contribute</a>
