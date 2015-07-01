@@ -90,12 +90,8 @@
             if (isNaN(height)) { // FF bug, apparently
                 height = width / (4/3);
             }
-            video.setAttribute('width', width);
-            video.setAttribute('height', height);
             canvas.setAttribute('width', width);
             canvas.setAttribute('height', height);
-            preview.setAttribute('width', width);
-            preview.setAttribute('height', height);
             streaming = true;
         }, false);
 
@@ -167,6 +163,18 @@ html {
     font-size: 18px;
 }
 
+html, body, table, td {
+    padding: 0;
+    margin: 0;
+    border: none;
+    border-spacing: 0;
+    border-collapse: collapse;
+}
+
+video {
+    display: inline-block;
+}
+
 video, img {
     border: none;
     border-radius: 4px;
@@ -184,7 +192,6 @@ button:hover {
 }
 
 .overlay {
-    margin-left: 20px;
     display: inline-block;
     position: relative;
 }
@@ -198,21 +205,37 @@ button:hover {
     width: 200px;
     z-index: -999;
 }
+
+tr, td {
+    vertical-align: top;
+    min-height: 500px;
+}
+
+.main, .main * .overlay, .main * img, .main * video {
+    width: 100%;
+}
     </style>
   </head>
 
   <body>
-    <div>
-      <video id="viewfinder" style="max-width: 100%">Please browser your update.</video>
-      <div class="overlay">
-        <img class="fg" id="preview" src="data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==">
-        <div class="bg">press space a lot</div>
-      </div>
-    </div>
     <canvas id="tmp" style="display:none"></canvas>
-    <br>
+    <table class="main">
+      <tr>
+        <td width="50%">
+          <video id="viewfinder">Please browser your update.</video>
+        </td>
+        <td width="50%">
+          <div>
+            <div class="overlay">
+              <img class="fg" id="preview" src="data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==">
+              <div class="bg">press space a lot</div>
+            </div>
+          </div>
+          <br>
+        </td>
+      </tr>
+    </table>
     <button id="clear">start over</button>
-    <br><br><br><br>
     <a href="https://github.com/rwos/gifstopmotion">contribute</a>
     <br><br><br><br>
     <br><br><br><br>

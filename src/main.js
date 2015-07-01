@@ -71,12 +71,8 @@
             if (isNaN(height)) { // FF bug, apparently
                 height = width / (4/3);
             }
-            video.setAttribute('width', width);
-            video.setAttribute('height', height);
             canvas.setAttribute('width', width);
             canvas.setAttribute('height', height);
-            preview.setAttribute('width', width);
-            preview.setAttribute('height', height);
             streaming = true;
         }, false);
 
