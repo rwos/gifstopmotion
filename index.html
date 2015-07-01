@@ -205,9 +205,7 @@ button:hover {
 }
 .overlay > .bg {
     position: absolute;
-    top: 100px;
-    left: 85px;
-    width: 200px;
+    top: 50%;
     z-index: -999;
 }
 
@@ -246,6 +244,12 @@ img:hover + .hover, .hover:hover {
     padding: 10px 20px;
     border-radius: 2px;
 }
+
+.instructions {
+    width: 100%;
+    text-align: center;
+    font-size: 40px;
+}
     </style>
   </head>
 
@@ -254,7 +258,12 @@ img:hover + .hover, .hover:hover {
     <table class="main">
       <tr>
         <td width="50%">
-          <video id="viewfinder">Please browser your update.</video>
+          <div>
+            <div class="overlay">
+              <video class="fg" id="viewfinder">Please browser your update.</video>
+              <div class="bg instructions">enable your camera</div>
+            </div>
+          </div>
         </td>
         <td width="50%">
           <div>
@@ -264,7 +273,7 @@ img:hover + .hover, .hover:hover {
                 <button id="save">download</button>
                 <button id="clear">start over</button>
               </div>
-              <div class="bg">press space a lot</div>
+              <div class="bg instructions">press space a lot</div>
             </div>
           </div>
           <br>
