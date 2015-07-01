@@ -39,8 +39,7 @@
             clear();
             ev.preventDefault();
         });
-        preview.addEventListener('click', function(ev) {
-            // XXX: this isn't exactly obvious
+        document.getElementById('save').addEventListener('click', function(ev) {
             download();
             ev.preventDefault();
         });
