@@ -102,6 +102,10 @@ img:hover + .hover, .hover:hover {
     border-radius: 2px;
 }
 
+.disabled {
+    display: none;
+}
+
 .instructions {
     width: 100%;
     text-align: center;

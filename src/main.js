@@ -78,6 +78,7 @@
             canvas.setAttribute('height', height);
             lastframe.setAttribute('width', width);
             lastframe.setAttribute('height', height);
+            preview.setAttribute('height', height);
             streaming = true;
         }, false);
 
@@ -118,6 +119,8 @@
     }
 
     function addframe() {
+        document.getElementById('save').className = ''; // enable button
+
         var context = canvas.getContext('2d');
         if (width && height) {
             canvas.width = width;
