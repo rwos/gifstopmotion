@@ -49,6 +49,7 @@
         });
         document.getElementById('greenscreen').addEventListener('click', function(ev) {
             updategreenscreen();
+            document.getElementById('greenscreen').className = 'disabled';
             ev.preventDefault();
         });
         document.getElementById('save').addEventListener('click', function(ev) {
@@ -90,12 +91,13 @@
             streaming = true;
         }, false);
 
-        document.body.addEventListener('keydown', function(ev){
+        document.body.addEventListener('keydown', function(ev) {
             if (ev.target.nodeName === 'TEXTAREA') {
                 return; // ignore
             }
             if (ev.charCode === 32 || ev.keyCode === 32) {
                 addframe();
+                console.log("preventdefault");
                 ev.preventDefault();
             }
         }, false);
@@ -127,6 +129,9 @@
     }
 
     function updategreenscreen() {
+        if (greenscreen) {
+            return;
+        }
         var context = canvas.getContext('2d');
         if (width && height) {
             canvas.width = width;
@@ -148,8 +153,20 @@
             context.drawImage(video, 0, 0, width, height);
             // remove background
             if (greenscreen) {
+                /// XXX DEBUG
+                var img = document.createElement('img');
+                img.setAttribute('src', greenscreen.toDataURL('image/png'));
+                img.setAttribute('class', 'frame');
+                document.body.appendChild(img);
+                /// XXX
                 context.globalCompositeOperation = 'difference'; /// XXX this is too simplistic
                 context.drawImage(greenscreen, 0, 0, width, height);
+                /// XXX DEBUG
+                var img = document.createElement('img');
+                img.setAttribute('src', canvas.toDataURL('image/png'));
+                img.setAttribute('class', 'frame');
+                document.body.appendChild(img);
+                /// XXX
                 context.globalCompositeOperation = 'source-over';
                 var map = context.getImageData(0, 0, width, height);
                 var l = map.data.length / 4;
@@ -171,6 +188,12 @@
                     }
                 }
                 context.putImageData(map, 0, 0);
+                /// XXX DEBUG
+                var img = document.createElement('img');
+                img.setAttribute('src', canvas.toDataURL('image/png'));
+                img.setAttribute('class', 'frame');
+                document.body.appendChild(img);
+                /// XXX
                 context.globalCompositeOperation = 'source-in';
                 context.drawImage(video, 0, 0, width, height);
                 context.globalCompositeOperation = 'source-over';
