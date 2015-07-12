@@ -31,7 +31,7 @@
             </div>
           </div>
         </td>
-        <td width="50%" id="preview-td">
+        <td width="50%">
           <div>
             <div class="overlay">
               <img class="fg" id="preview" height="1" src="data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==">
@@ -44,8 +44,17 @@
           </div>
         </td>
       </tr>
+      <tr>
+        <td colspan="2">
+          <textarea id="text" placeholder="caption (optional)"></textarea>
+        </td>
+      </tr>
+      <tr>
+        <td colspan="2">
+          <div class="disabled" id="framecontainer"></div>
+        </td>
+      </tr>
     </table>
-    <textarea id="text" placeholder="caption (optional)"></textarea>
     <input style="display: none" id="delay" type="range" min="10" max="500" step="10" value="200"></input>
   </body>
 </html>

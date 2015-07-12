@@ -22,6 +22,7 @@
     var lastframe = null;
     var preview = null;
     var text = null;
+    var framecontainer = null;
 
     var workerblob = new Blob([document.getElementById('workerscript').textContent], {type: 'text/javascript'});
 
@@ -39,6 +40,7 @@
         lastframe = document.getElementById('lastframe');
         preview = document.getElementById('preview');
         text = document.getElementById('text');
+        framecontainer = document.getElementById('framecontainer');
         document.getElementById('clear').addEventListener('click', function(ev) {
             clear();
             ev.preventDefault();
@@ -125,6 +127,8 @@
         if (width && height) {
             canvas.width = width;
             canvas.height = height;
+
+            // prepare frame, add caption
             context.drawImage(video, 0, 0, width, height);
             context.textAlign = 'center';
             context.font = 'bold 24px sans';
@@ -133,8 +137,20 @@
             context.fillText(text.value, width/2, height-24);
             context.strokeText(text.value, width/2, height-24);
 
+            // update transparent last frame overlay
             lastframe.getContext('2d').drawImage(canvas, 0, 0, width, height);
 
+            // add frame to frame list
+            var img = document.createElement('img');
+            img.setAttribute('src', canvas.toDataURL('image/png'));
+            img.setAttribute('class', 'frame');
+            framecontainer.appendChild(img);
+            framecontainer.className = '';
+            img.addEventListener('load', function() {
+                framecontainer.scrollLeft += 9000;
+            });
+
+            // update gif
             gif.addFrame(clonecanvas(canvas), {delay: delay});
             gif.on('finished', function(blob) {
                 preview.removeAttribute('height');
