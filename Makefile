@@ -13,10 +13,10 @@ deploy:
 
 index.html: src/index.html src/main.js src/main.css 3rd/gifjs 3rd/htmlminifier
 	mkdir -p www
-	sed -e '/<JSHEREPLZ>/{r 3rd/gifjs/dist/gif.js' \
+	sed -e '/INCLUDE JS/{r 3rd/gifjs/dist/gif.js' \
 		-e 'r src/main.js' -e 'd}' \
-		-e '/<WORKERJSHEREPLZ>/{r 3rd/gifjs/dist/gif.worker.js' -e 'd}' \
-		-e '/<CSSHEREPLZ>/{r src/main.css' -e 'd}' \
+		-e '/INCLUDE WORKER JS/{r 3rd/gifjs/dist/gif.worker.js' -e 'd}' \
+		-e '/INCLUDE CSS/{r src/main.css' -e 'd}' \
 		$< > $@
 	3rd/htmlminifier/cli.js --minify-css --minify-js --remove-comments --collapse-whitespace $@ > tmp.js
 	mv tmp.js $@
