@@ -19,6 +19,7 @@
 
     var video = null;
     var canvas = null;
+    var lastframe = null;
     var preview = null;
     var text = null;
 
@@ -35,6 +36,7 @@
     function init() {
         video = document.getElementById('viewfinder');
         canvas = document.getElementById('tmp');
+        lastframe = document.getElementById('lastframe');
         preview = document.getElementById('preview');
         text = document.getElementById('text');
         document.getElementById('clear').addEventListener('click', function(ev) {
@@ -74,6 +76,8 @@
             }
             canvas.setAttribute('width', width);
             canvas.setAttribute('height', height);
+            lastframe.setAttribute('width', width);
+            lastframe.setAttribute('height', height);
             streaming = true;
         }, false);
 
@@ -125,6 +129,8 @@
             context.strokeStyle = '1px solid black';
             context.fillText(text.value, width/2, height-24);
             context.strokeText(text.value, width/2, height-24);
+
+            lastframe.getContext('2d').drawImage(canvas, 0, 0, width, height);
 
             gif.addFrame(clonecanvas(canvas), {delay: delay});
             gif.on('finished', function(blob) {

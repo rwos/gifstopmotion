@@ -54,17 +54,24 @@ button:hover {
 .overlay > .fg {
     z-index: 2;
 }
+.overlay > .fg-2 {
+    position: absolute;
+    z-index: 2;
+}
 .overlay > .bg {
     position: absolute;
     top: 50%;
     z-index: -999;
+}
+.transparent {
+    opacity: 0.5;
 }
 
 tr, td {
     vertical-align: top;
 }
 
-.main, .main * .overlay, .main * img, .main * video {
+.main, .main * .overlay, .main * img, .main * video, .main * canvas {
     width: 100%;
 }
 
