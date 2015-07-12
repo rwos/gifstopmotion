@@ -23,13 +23,15 @@
     var preview = null;
     var text = null;
     var framecontainer = null;
+    var greenscreen = null;
 
     var workerblob = new Blob([document.getElementById('workerscript').textContent], {type: 'text/javascript'});
 
     var gif = new GIF({
         quality: 10,
         workers: 2,
-        workerScript: URL.createObjectURL(workerblob)
+        workerScript: URL.createObjectURL(workerblob),
+        transparent: 0x000000,
     });
 
     var delay = 200;
@@ -43,6 +45,10 @@
         framecontainer = document.getElementById('framecontainer');
         document.getElementById('clear').addEventListener('click', function(ev) {
             clear();
+            ev.preventDefault();
+        });
+        document.getElementById('greenscreen').addEventListener('click', function(ev) {
+            updategreenscreen();
             ev.preventDefault();
         });
         document.getElementById('save').addEventListener('click', function(ev) {
@@ -120,6 +126,16 @@
         a.click();
     }
 
+    function updategreenscreen() {
+        var context = canvas.getContext('2d');
+        if (width && height) {
+            canvas.width = width;
+            canvas.height = height;
+            context.drawImage(video, 0, 0, width, height);
+            greenscreen = clonecanvas(canvas);
+        }
+    }
+
     function addframe() {
         document.getElementById('save').className = ''; // enable button
 
@@ -128,8 +144,38 @@
             canvas.width = width;
             canvas.height = height;
 
-            // prepare frame, add caption
+            // prepare frame
             context.drawImage(video, 0, 0, width, height);
+            // remove background
+            if (greenscreen) {
+                context.globalCompositeOperation = 'difference'; /// XXX this is too simplistic
+                context.drawImage(greenscreen, 0, 0, width, height);
+                context.globalCompositeOperation = 'source-over';
+                var map = context.getImageData(0, 0, width, height);
+                var l = map.data.length / 4;
+                for (var i = 0; i < l; i++) {
+                    var r = map.data[i * 4 + 0];
+                    var g = map.data[i * 4 + 1];
+                    var b = map.data[i * 4 + 2];
+                    var a = map.data[i * 4 + 3];
+                    if (r+g+b > 50) {
+                        map.data[i * 4 + 0] = 255;
+                        map.data[i * 4 + 1] = 255;
+                        map.data[i * 4 + 2] = 255;
+                        map.data[i * 4 + 3] = 255;
+                    } else {
+                        map.data[i * 4 + 0] = 0;
+                        map.data[i * 4 + 1] = 0;
+                        map.data[i * 4 + 2] = 0;
+                        map.data[i * 4 + 3] = 0;
+                    }
+                }
+                context.putImageData(map, 0, 0);
+                context.globalCompositeOperation = 'source-in';
+                context.drawImage(video, 0, 0, width, height);
+                context.globalCompositeOperation = 'source-over';
+            }
+            // add caption
             context.textAlign = 'center';
             context.font = 'bold 24px sans';
             context.fillStyle = 'white';
