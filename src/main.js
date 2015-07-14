@@ -25,6 +25,8 @@
     var debug = null;
     var framecontainer = null;
     var greenscreen = null;
+    var framesToFrameIndex = [];
+    var frameCounter = 0;
 
     var workerblob = new Blob([document.getElementById('workerscript').textContent], {type: 'text/javascript'});
 
@@ -212,14 +214,18 @@
             // add frame to frame list
             var imgContainer = document.createElement('div');
             var remove = document.createElement('a');
-            remove.setAttribute('data-frame', gif.frames.length);
+            remove.setAttribute('data-frame', frameCounter);
             remove.setAttribute('class', 'remove-frame');
             remove.addEventListener('click', function() {
                 this.parentElement.parentElement.removeChild(this.parentElement);
                 if (gif.frames.length <= 1) {
                     clear();
                 }
-                gif.frames.splice(this.getAttribute('data-frame'), 1);
+                var frameId = parseInt(this.getAttribute('data-frame'));
+                var frameIndex = framesToFrameIndex.indexOf(frameId);
+                console.log('frame remove', frameId, frameIndex, framesToFrameIndex);
+                gif.frames.splice(frameIndex, 1);
+                framesToFrameIndex.splice(frameIndex, 1);
                 gif.render();
                 gif.on('finished', function(blob) {
                     preview.removeAttribute('height');
@@ -228,6 +234,9 @@
                 });
 
             });
+            console.log('frame added', frameCounter);
+            framesToFrameIndex.push(frameCounter);
+            frameCounter++;
             var img = document.createElement('img');
             img.setAttribute('src', canvas.toDataURL('image/png'));
             img.setAttribute('class', 'frame');
