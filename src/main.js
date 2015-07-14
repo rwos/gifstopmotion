@@ -105,7 +105,7 @@
         }, false);
 
         if (document.location.hash === '#d') {
-            debug.className = '';    
+            debug.className = '';
         }
     }
 
@@ -210,10 +210,30 @@
             lastframe.getContext('2d').drawImage(canvas, 0, 0, width, height);
 
             // add frame to frame list
+            var imgContainer = document.createElement('div');
+            var remove = document.createElement('a');
+            remove.setAttribute('data-frame', gif.frames.length);
+            remove.setAttribute('class', 'remove-frame');
+            remove.addEventListener('click', function() {
+                this.parentElement.parentElement.removeChild(this.parentElement);
+                if (gif.frames.length <= 1) {
+                    clear();
+                }
+                gif.frames.splice(this.getAttribute('data-frame'), 1);
+                gif.render();
+                gif.on('finished', function(blob) {
+                    preview.removeAttribute('height');
+                    preview.src = URL.createObjectURL(blob);
+                    gif.abort();
+                });
+
+            });
             var img = document.createElement('img');
             img.setAttribute('src', canvas.toDataURL('image/png'));
             img.setAttribute('class', 'frame');
-            framecontainer.appendChild(img);
+            imgContainer.appendChild(remove);
+            imgContainer.appendChild(img);
+            framecontainer.appendChild(imgContainer);
             framecontainer.className = '';
             img.addEventListener('load', function() {
                 framecontainer.scrollLeft += 9000;
