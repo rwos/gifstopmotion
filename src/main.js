@@ -34,7 +34,7 @@
         quality: 10,
         workers: 2,
         workerScript: URL.createObjectURL(workerblob),
-        transparent: 0xff00ff,
+        //transparent: 0xff00ff, XXX OFF for now
     });
 
     var delay = 200;
