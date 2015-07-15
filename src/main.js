@@ -25,6 +25,8 @@
     var debug = null;
     var framecontainer = null;
     var greenscreen = null;
+    var framesToFrameIndex = [];
+    var frameCounter = 0;
 
     var workerblob = new Blob([document.getElementById('workerscript').textContent], {type: 'text/javascript'});
 
@@ -105,7 +107,7 @@
         }, false);
 
         if (document.location.hash === '#d') {
-            debug.className = '';    
+            debug.className = '';
         }
     }
 
@@ -210,10 +212,37 @@
             lastframe.getContext('2d').drawImage(canvas, 0, 0, width, height);
 
             // add frame to frame list
+            var imgContainer = document.createElement('div');
+            var remove = document.createElement('a');
+            remove.setAttribute('data-frame', frameCounter);
+            remove.setAttribute('class', 'remove-frame');
+            remove.addEventListener('click', function() {
+                this.parentElement.parentElement.removeChild(this.parentElement);
+                if (gif.frames.length <= 1) {
+                    clear();
+                }
+                var frameId = parseInt(this.getAttribute('data-frame'));
+                var frameIndex = framesToFrameIndex.indexOf(frameId);
+                console.log('frame remove', frameId, frameIndex, framesToFrameIndex);
+                gif.frames.splice(frameIndex, 1);
+                framesToFrameIndex.splice(frameIndex, 1);
+                gif.render();
+                gif.on('finished', function(blob) {
+                    preview.removeAttribute('height');
+                    preview.src = URL.createObjectURL(blob);
+                    gif.abort();
+                });
+
+            });
+            console.log('frame added', frameCounter);
+            framesToFrameIndex.push(frameCounter);
+            frameCounter++;
             var img = document.createElement('img');
             img.setAttribute('src', canvas.toDataURL('image/png'));
             img.setAttribute('class', 'frame');
-            framecontainer.appendChild(img);
+            imgContainer.appendChild(remove);
+            imgContainer.appendChild(img);
+            framecontainer.appendChild(imgContainer);
             framecontainer.className = '';
             img.addEventListener('load', function() {
                 framecontainer.scrollLeft += 9000;
