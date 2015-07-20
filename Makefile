@@ -14,7 +14,7 @@ deploy:
 		git config user.name "DEPLOY MEISTER"; \
 		mv ../index.html ./; \
 		git add .; \
-		git commit --allow-empty -m 'deploy!'; \
+		git commit --allow-empty -m "deploy: ${TRAVIS_COMMIT_MSG}"; \
 		git push origin gh-pages > /dev/null 2>&1 || exit 1;
 
 local.html: src/index.html src/main.js src/main.css 3rd/gifjs Makefile
