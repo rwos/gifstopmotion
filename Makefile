@@ -11,8 +11,10 @@ deploy:
 	cd LIVE; \
 		git config user.email "ossdeploymeister@users.noreply.github.com"; \
 		git config user.name "DEPLOY MEISTER"; \
+		git status; \
+		git branch -v; \
 		git pull origin master; \
-		git push --quiet origin gh-pages > /dev/null 2>&1 || exit 1;
+		git push origin gh-pages > /dev/null 2>&1 || exit 1;
 
 index.html: src/index.html src/main.js src/main.css 3rd/gifjs 3rd/htmlminifier
 	mkdir -p www
