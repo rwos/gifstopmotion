@@ -1,0 +1,3 @@
+language: c
+sudo: false
+script: git status; git remote -v; git branch -v
