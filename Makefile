@@ -12,6 +12,7 @@ deploy:
 		git config user.email "ossdeploymeister@users.noreply.github.com"; \
 		git config user.name "DEPLOY MEISTER"; \
 		git pull origin master; \
+		make index.html; \
 		git push origin gh-pages > /dev/null 2>&1 || exit 1;
 
 index.html: src/index.html src/main.js src/main.css 3rd/gifjs 3rd/htmlminifier Makefile
