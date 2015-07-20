@@ -1,5 +1,14 @@
 language: c
 sudo: false
-script: git log;
 branches:
-    only: master
+  only: master
+env:
+  global:
+    - GH_REF: "github.com/rwos/gifstopmoption.git"
+    - secure: USZQij5dsAJ85gaW3Cy84zcyqzJdWygeVLbLK442fATmNVaBNnx/86VRkHiz3bAViKDjnxkm48NICalrOc/cQbRGRovQM9cAFBC3mKWNeOr7aZi2sSrDG5K7Go34uLKhk23o5jOS8A4wZMNodwpwKdgeFPSXI0bHqkdHFkjx202Vxt3ETuarDkBZZuFWV5F64GZ/KBfkJvZ5KlAqc12syVcFDWWmF+fVmsaR4kXkSj+4sM7VLb66ji6oPA5nrM+KCDpvFVpTD9nzCdB6IYB9OBNa3ExuqPqCC35HO1+bXMeZGvjcVyl+Y6ebkvqaWJA0eA67CzWVPMk4vRd8cTvKbOWAtmitdS/sAFV4XmvojZktIS6MejBwiR8qumQbUqoiZeVlzQ5aTsYZpb5Hhai6TIU66+POfPWs1+wJNfjdyAm2djtmXPvAQvU1koxvhXD2s1XvC5qQudeKu3NMDPiKkUxQ2GIq2dYjd2zviH3MZznC6/bgUW0G7qIH9YeSlP397c3TpHbMgFJcsPdl+E5MCeB5dT+RdTd6zKXTuKybrtyJ/SRt4DCrcT7oaJT4ZPj0Ms1fnNubqkHDKMpe0WqOMizlig+llw2AOK7iA7soWrsdeFGtngxphbaZAxNpW44x0C1NDNpaRu3sZS/C76ATKxmzhpoCx7a9VuLNPOT4JSs=
+
+before_install:
+install:
+before_script:
+script: make deploy
+after_script:

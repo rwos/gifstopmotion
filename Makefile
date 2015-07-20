@@ -6,10 +6,13 @@ watch:
 	while true; do $(MAKE) build ; sleep 0.5; done
 
 deploy:
-	git checkout gh-pages
-	git pull origin master
-	git push origin gh-pages
-	git checkout master
+	[ -z "$$TRAVIS" ] && exit 1 # let travis take care of this
+	git clone -b gh-pages "https://${GH_TOKEN}@${GH_REF}" LIVE > /dev/null 2>&1 || exit 1
+	cd LIVE; \
+		git config user.email "ossdeploymeister@users.noreply.github.com"; \
+		git config user.name "DEPLOY MEISTER"; \
+		git pull origin master; \
+		git push --quiet origin gh-pages > /dev/null 2>&1 || exit 1;
 
 index.html: src/index.html src/main.js src/main.css 3rd/gifjs 3rd/htmlminifier
 	mkdir -p www
