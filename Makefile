@@ -14,12 +14,13 @@ deploy:
 		git pull origin master; \
 		git push origin gh-pages > /dev/null 2>&1 || exit 1;
 
-index.html: src/index.html src/main.js src/main.css 3rd/gifjs 3rd/htmlminifier
+index.html: src/index.html src/main.js src/main.css 3rd/gifjs 3rd/htmlminifier Makefile
 	mkdir -p www
 	sed -e '/INCLUDE JS/{r 3rd/gifjs/dist/gif.js' \
 		-e 'r src/main.js' -e 'd}' \
 		-e '/INCLUDE WORKER JS/{r 3rd/gifjs/dist/gif.worker.js' -e 'd}' \
 		-e '/INCLUDE CSS/{r src/main.css' -e 'd}' \
+		-e 's!INCLUDE GITREF!<a href="https://github.com/rwos/gifstopmotion/tree/'`git rev-parse HEAD`'">v'`git log --oneline | wc -l`'.0</a>!' \
 		$< > $@
 	3rd/htmlminifier/cli.js --minify-css --minify-js --remove-comments --collapse-whitespace $@ > tmp.js
 	mv tmp.js $@

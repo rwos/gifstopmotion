@@ -175,3 +175,12 @@ img:hover + .hover, .hover:hover {
     background: #EFECCA;
     border: 4px solid #EFECCA;
 }
+
+.version * {
+    color: #EFECCA !important;
+    font-size: small;
+    position: fixed;
+    text-decoration: none;
+    bottom: 0;
+    right: 0;
+}
