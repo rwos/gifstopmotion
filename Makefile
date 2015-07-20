@@ -14,7 +14,7 @@ deploy:
 		git status; \
 		git branch -v; \
 		git pull origin master; \
-		git push origin gh-pages > /dev/null 2>&1 || exit 1;
+		git push origin gh-pages || exit 1;
 
 index.html: src/index.html src/main.js src/main.css 3rd/gifjs 3rd/htmlminifier
 	mkdir -p www
