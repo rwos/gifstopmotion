@@ -24,7 +24,6 @@ local.html: src/index.html src/main.js src/main.css 3rd/gifjs Makefile
 		-e '/INCLUDE CSS/{r src/main.css' -e 'd}' \
 		-e 's!INCLUDE GITREF!<a href="https://github.com/rwos/gifstopmotion">v'`git log --oneline | wc -l`'.0</a>!' \
 		$< > $@
-	mv tmp.js $@
 
 index.html: local.html 3rd/htmlminifier
 	test -z "${TRAVIS}" && exit 1 || exit 0 # let travis take care of this
