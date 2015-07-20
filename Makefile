@@ -13,6 +13,7 @@ deploy:
 		git config user.name "DEPLOY MEISTER"; \
 		git status; \
 		git branch -v; \
+		git remote -v; \
 		git pull origin master; \
 		git push origin gh-pages || exit 1;
 
