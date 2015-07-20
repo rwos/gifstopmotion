@@ -6,6 +6,10 @@ env:
   global:
   - GH_REF: github.com/rwos/gifstopmotion.git
   - secure: pZmLMF7hzPbwki0tDbDLnrdzqOWuLI9PUOhFQgNZ95MI6k7LRR6bn2RaL8coUXDi/vr+Djw+1KUQiem/05jzHYvc9df10+RGSTi/jhyYMx/WQjHr1VTR9Gq//YxHwI5P+wBKffmMF4IVVHB/wM8Yo+SQpxLPFBgFkA4cAbm6Mxd0emBdqzsJYUftgBAM2Ury6QcfRjgX4JyYtFc3FUh9eKXelQGUHU1EztyofdmU11WIFWCe8rykX91DZfr58BGOD4KrsLPycANmdLTvSAuMJpPaXS105JmkcHhi9dXj1ITgHE2hnbywEehOOUCIjjN2COHohv1kgCNtbhuBomT1N5lOuNMXfRAcdsAxbwH8U3Itm1IkITuC6WYuiAvfrBMuM3L2+1bqZ34Gydt3r9qyu+WWbKq23SM9pIFUYrCFK1d/d9mi20lvVkn9N9KapuDSdEaJnkWfn0CuW6E8trLXStq/p5FTkaMWD6+GaAu2biudNz/OmO8dOL6k1b9gyzdYWgmxCw96oYEKQZ9/HuriGAjN0Qi4AaUihVm9VGdqY8BicEE7LPJsPyt7Af9q7CFA3XENyKR8Ru29VO8lw0hg74kJ96PxeEhsug/oDpVj7qi/NaduzlQGcyfY8MXE7c16VP+wOgIq1BGen5HJoAwYu737XAJoMiYv5Mf14r6dCVc=
+cache:
+  directories:
+    - 3rd
+
 before_install: export TRAVIS_COMMIT_MSG="$(git log --format=%B --no-merges -n 1)"
 install: 
 before_script: 
