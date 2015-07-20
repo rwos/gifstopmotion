@@ -5,10 +5,10 @@ gifstopmotion
 
 ## hacking
 
-* do `make run`
-* in another terminal, do `make watch`
+* do `make watch`
+* in another terminal, do `make run`
 * edit the sources (in `src/`)
-* reload the browser tab that should've opened with `make watch` periodically
+* reload the browser tab that should've opened with `make run` periodically
 
 ## license
 
