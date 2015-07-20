@@ -12,6 +12,11 @@ gifstopmotion
 * edit the sources (in `src/`)
 * reload the browser tab that should've opened with `make run` periodically
 
+## contributing
+
+* open a pull request on github
+* once that's merged, it's automatically deployed right away
+
 ## license
 
 Copyright 2015 by Richard Wossal <richard@r-wos.org>
