@@ -27,8 +27,7 @@ local.html: src/index.html src/main.js src/main.css 3rd/gifjs Makefile
 
 index.html: local.html 3rd/htmlminifier
 	test -z "${TRAVIS}" && exit 1 || exit 0 # let travis take care of this
-	3rd/htmlminifier/cli.js --minify-css --minify-js --remove-comments --collapse-whitespace $@ > tmp.js
-	mv tmp.js $@
+	3rd/htmlminifier/cli.js --minify-css --minify-js --remove-comments --collapse-whitespace $< > $@
 
 3rd/gifjs:
 	git clone https://github.com/jnordberg/gif.js.git $@
