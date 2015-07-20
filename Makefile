@@ -6,7 +6,7 @@ watch:
 	while true; do $(MAKE) build ; sleep 0.5; done
 
 deploy:
-	[ -z "$$TRAVIS" ] && exit 1 # let travis take care of this
+	test -z "${TRAVIS}" && exit 1 || exit 0 # let travis take care of this
 	git clone -b gh-pages "https://${GH_TOKEN}@${GH_REF}" LIVE > /dev/null 2>&1 || exit 1
 	cd LIVE; \
 		git config user.email "ossdeploymeister@users.noreply.github.com"; \
