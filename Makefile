@@ -27,13 +27,13 @@ index.html: src/index.html src/main.js src/main.css 3rd/gifjs 3rd/htmlminifier M
 	mv tmp.js $@
 
 3rd/gifjs:
-	git clone git@github.com:jnordberg/gif.js.git $@
+	git clone https://github.com/jnordberg/gif.js.git $@
 	# yes
 	echo ';' >> 3rd/gifjs/dist/gif.worker.js
 	echo ';' >> 3rd/gifjs/dist/gif.js
 
 3rd/htmlminifier:
-	git clone git@github.com:kangax/html-minifier.git $@
+	git clone https://github.com/kangax/html-minifier.git $@
 	cd $@ && npm install
 
 run:
