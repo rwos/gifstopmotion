@@ -11,7 +11,7 @@ deploy:
 	cd LIVE; \
 		git config user.email "ossdeploymeister@users.noreply.github.com"; \
 		git config user.name "DEPLOY MEISTER"; \
-		git pull origin master; \
+		git pull --no-edit origin master; \
 		make index.html; \
 		git push origin gh-pages > /dev/null 2>&1 || exit 1;
 
