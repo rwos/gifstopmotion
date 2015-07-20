@@ -181,6 +181,6 @@ img:hover + .hover, .hover:hover {
     font-size: small;
     position: fixed;
     text-decoration: none;
-    bottom: 0;
-    right: 0;
+    bottom: 2;
+    right: 2;
 }
