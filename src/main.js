@@ -260,6 +260,7 @@
             gif.addFrame(clonecanvas(canvas), {delay: delay});
             gif.on('finished', function(blob) {
                 preview.removeAttribute('height');
+                preview.src = '';
                 preview.src = URL.createObjectURL(blob);
                 gif.abort();
             });
