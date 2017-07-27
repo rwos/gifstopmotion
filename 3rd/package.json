@@ -1,0 +1,12 @@
+{
+  "name": "gifstopmotion",
+  "version": "0.0.0",
+  "description": "gifstopmotion",
+  "license": "MIT",
+  "devDependencies": {
+    "html-minifier": "*",
+    "gif.js": "*"
+  },
+  "dependencies": {
+  }
+}
