@@ -3,9 +3,6 @@ gifstopmotion
 
 ## https://rwos.github.io/gifstopmotion/
 
-
-[![Deployment Status](https://travis-ci.org/rwos/gifstopmotion.svg?branch=master)](https://travis-ci.org/rwos/gifstopmotion)
-
 ## hacking
 
 * do `make watch`
