@@ -15,8 +15,8 @@ gifstopmotion
 
 ## contributing
 
+* once you're done, run `make build` to update the docs/index.html
 * open a pull request on github
-* once that's merged, it's automatically deployed right away
 
 ## license
 
