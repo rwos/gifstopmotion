@@ -14,27 +14,48 @@
 */
 (function() {
     function frames(state, action) {
+        if (!state) {
+            state = [];
+        }
+
         switch (action.type) {
             case 'FRAME_ADD':
-                state.frames = state.frames.concat({
+                return state.concat({
                     frame: action.frame,
                     canvas: action.canvas
                 });
-                return state;
             case 'FRAME_REMOVE':
-                state.frames = state.frames.filter(function (element, index) {
+                return state.filter(function (element, index) {
                     return index !== action.index;
                 });
-                return state;
             case 'RESET':
-                state.frames = [];
-                return state;
+                return [];
             default:
                 return state
         }
     }
 
-    Redux.createStore(frames, {'frames': []});
+    function settings(state, action) {
+        if (!state) {
+            state = {
+                delay: 200,
+            }
+        }
+
+        switch (action.type) {
+            case 'CHANGE_DELAY':
+                return {
+                    delay: action.value,
+                };
+            default:
+                return state
+        }
+    }
+
+    var store = Redux.createStore(Redux.combineReducers({
+        frames: frames,
+        settings: settings
+    }));
 
     var width = 320;
     var height = 0;
@@ -73,8 +94,10 @@
             ev.preventDefault();
         });
         document.getElementById('delay').addEventListener('change', function(ev) {
-            // XXX: this should reencode the whole thing with that delay
-            delay = parseInt(ev.target.value, 10);
+            store.dispatch({
+                type: 'CHANGE_DELAY',
+                value: parseInt(ev.target.value, 10)
+            });
         });
 
         navigator.getMedia = (navigator.getUserMedia
@@ -232,23 +255,35 @@
         }
     }
 
+    var state,
+        gif,
+        frameCounter,
+        remove,
+        imgContainer,
+        frameCanvas,
+        frame,
+        img;
     store.subscribe(function () {
-        var gif = new GIF({
+        gif = new GIF({
             quality: 10,
             workers: 2,
             workerScript: URL.createObjectURL(workerblob),
             //transparent: 0xff00ff, XXX OFF for now
         });
 
-        var delay = 200;
-        frames = store.getState().frames;
+        state = store.getState();
+        frames = state.frames;
+        delay = state.settings.delay;
         framecontainer.innerHTML = '';
 
-        for (var frameCounter in frames) {
-            var remove = document.createElement('a'),
-                imgContainer = document.createElement('div'),
-                frameCanvas = frames[frameCounter].canvas,
-                frame = frames[frameCounter].frame;
+        console.log(state);
+
+        for (frameCounter in frames) {
+            remove = document.createElement('a');
+            imgContainer = document.createElement('div');
+            frameCanvas = frames[frameCounter].canvas;
+            frame = frames[frameCounter].frame;
+
             remove.setAttribute('data-frame', frameCounter);
             remove.setAttribute('class', 'remove-frame');
             remove.addEventListener('click', function() {
@@ -258,7 +293,7 @@
                 });
             });
 
-            var img = document.createElement('img');
+            img = document.createElement('img');
             img.setAttribute('src', frame);
             img.setAttribute('class', 'frame');
             imgContainer.appendChild(remove);
