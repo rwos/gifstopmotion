@@ -13,6 +13,29 @@
     <https://developer.mozilla.org/en-US/docs/Web/API/WebRTC_API/Taking_still_photos>
 */
 (function() {
+    function frames(state, action) {
+        switch (action.type) {
+            case 'FRAME_ADD':
+                state.frames = state.frames.concat({
+                    frame: action.frame,
+                    canvas: action.canvas
+                });
+                return state;
+            case 'FRAME_REMOVE':
+                state.frames = state.frames.filter(function (element, index) {
+                    return index !== action.index;
+                });
+                return state;
+            case 'RESET':
+                state.frames = [];
+                return state;
+            default:
+                return state
+        }
+    }
+
+    Redux.createStore(frames, {'frames': []});
+
     var width = 320;
     var height = 0;
     var streaming = false;
@@ -25,19 +48,8 @@
     var debug = null;
     var framecontainer = null;
     var greenscreen = null;
-    var framesToFrameIndex = [];
-    var frameCounter = 0;
 
     var workerblob = new Blob([document.getElementById('workerscript').textContent], {type: 'text/javascript'});
-
-    var gif = new GIF({
-        quality: 10,
-        workers: 2,
-        workerScript: URL.createObjectURL(workerblob),
-        //transparent: 0xff00ff, XXX OFF for now
-    });
-
-    var delay = 200;
 
     function init() {
         video = document.getElementById('viewfinder');
@@ -91,7 +103,6 @@
             canvas.setAttribute('height', height);
             lastframe.setAttribute('width', width);
             lastframe.setAttribute('height', height);
-            preview.setAttribute('height', height);
             streaming = true;
         }, false);
 
@@ -123,8 +134,7 @@
     // main stuff
 
     function clear() {
-        // XXX only method that seemed to work
-        document.location = document.location;
+        store.dispatch({type: 'RESET'});
     }
 
     function download() {
@@ -157,9 +167,6 @@
     }
 
     function addframe() {
-        /// XXX move all this document stuff into init
-        document.getElementById('save').className = ''; // enable button
-
         var context = canvas.getContext('2d');
         if (width && height) {
             canvas.width = width;
@@ -208,65 +215,84 @@
             context.strokeText(text.value, width/2, height-24);
 
             // update transparent last frame overlay
-            lastframe.getContext('2d').clearRect(0, 0, width, height);
-            lastframe.getContext('2d').drawImage(canvas, 0, 0, width, height);
+            store.dispatch({
+                type: 'FRAME_ADD',
+                canvas: clonecanvas(canvas),
+                frame: canvas.toDataURL('image/png')
+            });
 
-            // add frame to frame list
-            var imgContainer = document.createElement('div');
-            var remove = document.createElement('a');
+            if (greenscreen) {
+                context.globalCompositeOperation = 'destination-over';
+                /// XXX: this must match the gifjs "transparent" value
+                context.fillStyle = "rgb(255,0,255)";
+                context.fillRect(0, 0, width, height);
+                debugcapture(canvas);
+                context.globalCompositeOperation = 'source-over';
+            }
+        }
+    }
+
+    store.subscribe(function () {
+        var gif = new GIF({
+            quality: 10,
+            workers: 2,
+            workerScript: URL.createObjectURL(workerblob),
+            //transparent: 0xff00ff, XXX OFF for now
+        });
+
+        var delay = 200;
+        frames = store.getState().frames;
+        framecontainer.innerHTML = '';
+
+        for (var frameCounter in frames) {
+            var remove = document.createElement('a'),
+                imgContainer = document.createElement('div'),
+                frameCanvas = frames[frameCounter].canvas,
+                frame = frames[frameCounter].frame;
             remove.setAttribute('data-frame', frameCounter);
             remove.setAttribute('class', 'remove-frame');
             remove.addEventListener('click', function() {
-                this.parentElement.parentElement.removeChild(this.parentElement);
-                if (gif.frames.length <= 1) {
-                    clear();
-                }
-                var frameId = parseInt(this.getAttribute('data-frame'));
-                var frameIndex = framesToFrameIndex.indexOf(frameId);
-                console.log('frame remove', frameId, frameIndex, framesToFrameIndex);
-                gif.frames.splice(frameIndex, 1);
-                framesToFrameIndex.splice(frameIndex, 1);
-                gif.render();
-                gif.on('finished', function(blob) {
-                    preview.removeAttribute('height');
-                    preview.src = URL.createObjectURL(blob);
-                    gif.abort();
+                store.dispatch({
+                    type: 'FRAME_REMOVE',
+                    index: parseInt(this.getAttribute('data-frame')),
                 });
-
             });
-            console.log('frame added', frameCounter);
-            framesToFrameIndex.push(frameCounter);
-            frameCounter++;
+
             var img = document.createElement('img');
-            img.setAttribute('src', canvas.toDataURL('image/png'));
+            img.setAttribute('src', frame);
             img.setAttribute('class', 'frame');
             imgContainer.appendChild(remove);
             imgContainer.appendChild(img);
             framecontainer.appendChild(imgContainer);
             framecontainer.className = '';
+
+            gif.addFrame(frameCanvas, {delay: delay});
+        }
+
+        if (frames.length) {
             img.addEventListener('load', function() {
                 framecontainer.scrollLeft += 9000;
             });
 
-            // update gif
-            if (greenscreen) {
-                context.globalCompositeOperation = 'destination-over';
-                /// XXX: this must match the gifjs "transparent" value
-                context.fillStyle = "rgb(255,0,255)"
-                context.fillRect(0, 0, width, height);
-                debugcapture(canvas);
-                context.globalCompositeOperation = 'source-over';
-            }
-            gif.addFrame(clonecanvas(canvas), {delay: delay});
+            lastframe.getContext('2d').clearRect(0, 0, width, height);
+            lastframe.getContext('2d').drawImage(frameCanvas, 0, 0, width, height);
+
+            gif.render();
             gif.on('finished', function(blob) {
                 preview.removeAttribute('height');
-                preview.src = '';
                 preview.src = URL.createObjectURL(blob);
                 gif.abort();
             });
-            gif.render();
+
+            document.getElementById('save').className = '';
+        } else {
+            lastframe.getContext('2d').clearRect(0, 0, width, height);
+
+            preview.src = 'data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==';
+            preview.setAttribute('height', height);
+            document.getElementById('save').className = 'disabled';
         }
-    }
+    });
 
     window.addEventListener('load', init, false);
 })();

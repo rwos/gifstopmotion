@@ -9,6 +9,7 @@ build: docs/index.html
 
 local.html: src/index.html src/main.js src/main.css Makefile
 	sed -e '/INCLUDE JS/{r 3rd/node_modules/gif.js/dist/gif.js' \
+	    -e 'r 3rd/node_modules/redux/dist/redux.js' \
 		-e 'r src/main.js' -e 'd}' \
 		-e '/INCLUDE WORKER JS/{r 3rd/node_modules/gif.js/dist/gif.worker.js' -e 'd}' \
 		-e '/INCLUDE CSS/{r src/main.css' -e 'd}' \
