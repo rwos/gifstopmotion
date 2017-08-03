@@ -13,7 +13,10 @@
     <https://developer.mozilla.org/en-US/docs/Web/API/WebRTC_API/Taking_still_photos>
 */
 (function() {
-    function frames(state, action) {
+
+    // redux setup
+
+    function framesReducer(state, action) {
         if (!state) {
             state = [];
         }
@@ -26,7 +29,7 @@
                 });
             case 'FRAME_REMOVE':
                 return state.filter(function (element, index) {
-                    return index !== action.index;
+                    return index !== action.frameId;
                 });
             case 'RESET':
                 return [];
@@ -35,10 +38,12 @@
         }
     }
 
-    function settings(state, action) {
+    function settingsReducer(state, action) {
         if (!state) {
             state = {
                 delay: 200,
+                debug: false,
+                greenscreen: false
             }
         }
 
@@ -46,15 +51,29 @@
             case 'CHANGE_DELAY':
                 return {
                     delay: action.value,
+                    debug: state.debug,
+                    greenscreen: state.greenscreen
+                };
+            case 'TOGGLE_DEBUG':
+                return {
+                    delay: state.delay,
+                    debug: !state.debug,
+                    greenscreen: state.greenscreen
+                };
+            case 'TOGGLE_GREENSCREEN':
+                return {
+                    delay: state.delay,
+                    debug: state.debug,
+                    greenscreen: !state.greenscreen
                 };
             default:
                 return state
         }
     }
 
-    var store = Redux.createStore(Redux.combineReducers({
-        frames: frames,
-        settings: settings
+    window.store = Redux.createStore(Redux.combineReducers({
+        frames: framesReducer,
+        settings: settingsReducer
     }));
 
     var width = 320;
@@ -80,25 +99,18 @@
         text = document.getElementById('text');
         debug = document.getElementById('debug');
         framecontainer = document.getElementById('framecontainer');
-        document.getElementById('clear').addEventListener('click', function(ev) {
-            clear();
-            ev.preventDefault();
-        });
+        document.getElementById('clear').addEventListener('click', clear);
+
         document.getElementById('greenscreen').addEventListener('click', function(ev) {
             updategreenscreen();
             document.getElementById('greenscreen').className = 'disabled';
-            ev.preventDefault();
+            return toggleGreenscreen();
         });
         document.getElementById('save').addEventListener('click', function(ev) {
             download();
             ev.preventDefault();
         });
-        document.getElementById('delay').addEventListener('change', function(ev) {
-            store.dispatch({
-                type: 'CHANGE_DELAY',
-                value: parseInt(ev.target.value, 10)
-            });
-        });
+        document.getElementById('delay').addEventListener('change', changeDelay);
 
         navigator.getMedia = (navigator.getUserMedia
                            || navigator.webkitGetUserMedia
@@ -141,7 +153,7 @@
         }, false);
 
         if (document.location.hash === '#d') {
-            debug.className = '';
+            toggleDebug();
         }
     }
 
@@ -158,6 +170,29 @@
 
     function clear() {
         store.dispatch({type: 'RESET'});
+        return false;
+    }
+
+    function changeDelay(event) {
+        store.dispatch({
+            type: 'CHANGE_DELAY',
+            value: parseInt(event.target.value, 10)
+        });
+        return false;
+    }
+
+    function toggleDebug(value) {
+        store.dispatch({
+            type: 'TOGGLE_DEBUG'
+        });
+        return false;
+    }
+
+    function toggleGreenscreen() {
+        store.dispatch({
+            type: 'TOGGLE_GREENSCREEN'
+        });
+        return false;
     }
 
     function download() {
@@ -170,9 +205,6 @@
     }
 
     function updategreenscreen() {
-        if (greenscreen) {
-            return;
-        }
         var context = canvas.getContext('2d');
         if (width && height) {
             canvas.width = width;
@@ -183,6 +215,10 @@
     }
 
     function debugcapture(canvas) {
+        if (!store.getState().settings.debug) {
+            return;
+        }
+
         var img = document.createElement('img');
         img.setAttribute('src', canvas.toDataURL('image/png'));
         img.setAttribute('class', 'frame');
@@ -198,7 +234,7 @@
             // prepare frame
             context.drawImage(video, 0, 0, width, height);
             // remove background
-            if (greenscreen) {
+            if (store.getState().settings.greenscreen) {
                 debugcapture(greenscreen);
                 context.globalCompositeOperation = 'difference'; /// XXX this is too simplistic
                 context.drawImage(greenscreen, 0, 0, width, height);
@@ -258,11 +294,40 @@
     var state,
         gif,
         frameCounter,
-        remove,
-        imgContainer,
+        frameLength,
         frameCanvas,
         frame,
-        img;
+        frames,
+        delay;
+
+    function buildPreviewFrame(container, frameId, imageSrc, isLast) {
+        var remove = document.createElement('a'),
+            imgContainer = document.createElement('div'),
+            img = document.createElement('img');
+
+        remove.setAttribute('data-frame', frameId);
+        remove.setAttribute('class', 'remove-frame');
+        remove.addEventListener('click', function() {
+            store.dispatch({
+                type: 'FRAME_REMOVE',
+                frameId: parseInt(this.getAttribute('data-frame')),
+            });
+        });
+
+        img.setAttribute('src', imageSrc);
+        img.setAttribute('class', 'frame');
+        imgContainer.appendChild(remove);
+        imgContainer.appendChild(img);
+
+        container.appendChild(imgContainer);
+
+        if (isLast) {
+            img.addEventListener('load', function () {
+                container.scrollLeft += 9000;
+            });
+        }
+    }
+
     store.subscribe(function () {
         gif = new GIF({
             quality: 10,
@@ -275,40 +340,17 @@
         frames = state.frames;
         delay = state.settings.delay;
         framecontainer.innerHTML = '';
+        frameLength = frames.length;
 
-        console.log(state);
-
-        for (frameCounter in frames) {
-            remove = document.createElement('a');
-            imgContainer = document.createElement('div');
+        for (frameCounter = 0; frameCounter < frameLength; frameCounter++) {
             frameCanvas = frames[frameCounter].canvas;
             frame = frames[frameCounter].frame;
 
-            remove.setAttribute('data-frame', frameCounter);
-            remove.setAttribute('class', 'remove-frame');
-            remove.addEventListener('click', function() {
-                store.dispatch({
-                    type: 'FRAME_REMOVE',
-                    index: parseInt(this.getAttribute('data-frame')),
-                });
-            });
-
-            img = document.createElement('img');
-            img.setAttribute('src', frame);
-            img.setAttribute('class', 'frame');
-            imgContainer.appendChild(remove);
-            imgContainer.appendChild(img);
-            framecontainer.appendChild(imgContainer);
-            framecontainer.className = '';
-
+            buildPreviewFrame(framecontainer, frameCounter, frame, frameLength-1 === frameCounter);
             gif.addFrame(frameCanvas, {delay: delay});
         }
 
         if (frames.length) {
-            img.addEventListener('load', function() {
-                framecontainer.scrollLeft += 9000;
-            });
-
             lastframe.getContext('2d').clearRect(0, 0, width, height);
             lastframe.getContext('2d').drawImage(frameCanvas, 0, 0, width, height);
 
@@ -320,12 +362,18 @@
             });
 
             document.getElementById('save').className = '';
+            framecontainer.className = '';
         } else {
             lastframe.getContext('2d').clearRect(0, 0, width, height);
 
             preview.src = 'data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==';
             preview.setAttribute('height', height);
             document.getElementById('save').className = 'disabled';
+            framecontainer.className = 'disabled';
+        }
+
+        if (state.settings.debug) {
+            debug.className = '';
         }
     });
 
