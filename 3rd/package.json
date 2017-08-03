@@ -4,9 +4,10 @@
   "description": "gifstopmotion",
   "license": "MIT",
   "devDependencies": {
-    "html-minifier": "*",
-    "gif.js": "*"
+    "gif.js": "*",
+    "html-minifier": "*"
   },
   "dependencies": {
+    "redux": "^3.7.2"
   }
 }
