@@ -1159,6 +1159,7 @@ Object.defineProperty(exports, '__esModule', { value: true });
             gif.render();
             gif.on('finished', function(blob) {
                 preview.removeAttribute('height');
+                preview.src = '';
                 preview.src = URL.createObjectURL(blob);
                 gif.abort();
             });
@@ -1413,7 +1414,7 @@ img:hover + .hover, .hover:hover {
     <div id="debug" class="disabled"></div>
     <input style="display: none" id="delay" type="range" min="10" max="500" step="10" value="200" />
     <div class="version">
-      <a href="https://github.com/rwos/gifstopmotion">v78.0</a>
+      <a href="https://github.com/rwos/gifstopmotion">v79.0</a>
     </div>
   </body>
 </html>
