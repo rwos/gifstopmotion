@@ -15,6 +15,10 @@
 (function() {
 
     // redux setup
+    var currentFrame = 0;
+    function getFrameId() {
+        return ++currentFrame;
+    }
 
     function framesReducer(state, action) {
         if (!state) {
@@ -24,12 +28,13 @@
         switch (action.type) {
             case 'FRAME_ADD':
                 return state.concat({
+                    id: getFrameId(),
                     frame: action.frame,
                     canvas: action.canvas
                 });
             case 'FRAME_REMOVE':
-                return state.filter(function (element, index) {
-                    return index !== action.frameId;
+                return state.filter(function (element) {
+                    return element.id !== action.frameId;
                 });
             case 'RESET':
                 return [];
@@ -305,12 +310,11 @@
             imgContainer = document.createElement('div'),
             img = document.createElement('img');
 
-        remove.setAttribute('data-frame', frameId);
         remove.setAttribute('class', 'remove-frame');
         remove.addEventListener('click', function() {
             store.dispatch({
                 type: 'FRAME_REMOVE',
-                frameId: parseInt(this.getAttribute('data-frame')),
+                frameId: parseInt(this.parentElement.getAttribute('data-frame')),
             });
         });
 
@@ -318,6 +322,7 @@
         img.setAttribute('class', 'frame');
         imgContainer.appendChild(remove);
         imgContainer.appendChild(img);
+        imgContainer.setAttribute('data-frame', frameId)
 
         container.appendChild(imgContainer);
 
@@ -339,15 +344,29 @@
         state = store.getState();
         frames = state.frames;
         delay = state.settings.delay;
-        framecontainer.innerHTML = '';
         frameLength = frames.length;
+
+        var domFrames = document.querySelectorAll('[data-frame]')
+            domFramesMap = {};
+        for (frameCounter = 0; frameCounter < domFrames.length; frameCounter++) {
+            domFramesMap[domFrames[frameCounter].getAttribute('data-frame')] = domFrames[frameCounter];
+        }
 
         for (frameCounter = 0; frameCounter < frameLength; frameCounter++) {
             frameCanvas = frames[frameCounter].canvas;
-            frame = frames[frameCounter].frame;
+            frame = frames[frameCounter].frame
+            frameId = frames[frameCounter].id;
 
-            buildPreviewFrame(framecontainer, frameCounter, frame, frameLength-1 === frameCounter);
+            if (typeof domFramesMap[frameId] === "undefined") {
+                buildPreviewFrame(framecontainer, frameId, frame, frameLength-1 === frameCounter);
+            }
             gif.addFrame(frameCanvas, {delay: delay});
+            delete domFramesMap[frameId];
+        }
+
+        var toBeDeleted = Object.keys(domFramesMap);
+        for (frameCounter = 0; frameCounter < toBeDeleted.length; frameCounter++) {
+            domFramesMap[toBeDeleted[frameCounter]].parentElement.removeChild(domFramesMap[toBeDeleted[frameCounter]]);
         }
 
         if (frames.length) {
