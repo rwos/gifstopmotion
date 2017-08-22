@@ -117,7 +117,8 @@
         });
         document.getElementById('delay').addEventListener('change', changeDelay);
 
-        navigator.getMedia = ((navigator.mediaDevices && navigator.mediaDevices.getUserMedia)
+        navigator.getMedia = ((navigator.mediaDevices && navigator.mediaDevices.getUserMedia
+                               && navigator.mediaDevices.getUserMedia.bind(navigator.mediaDevices))
                            || navigator.getUserMedia
                            || navigator.webkitGetUserMedia
                            || navigator.mozGetUserMedia
