@@ -919,9 +919,7 @@ Object.defineProperty(exports, '__esModule', { value: true });
         });
         document.getElementById('delay').addEventListener('change', changeDelay);
 
-        navigator.getMedia = ((navigator.mediaDevices && navigator.mediaDevices.getUserMedia
-                               && navigator.mediaDevices.getUserMedia.bind(navigator.mediaDevices))
-                           || navigator.getUserMedia
+        navigator.getMedia = (navigator.getUserMedia
                            || navigator.webkitGetUserMedia
                            || navigator.mozGetUserMedia
                            || navigator.msGetUserMedia);
@@ -1435,7 +1433,7 @@ img:hover + .hover, .hover:hover {
     <div id="debug" class="disabled"></div>
     <input style="display: none" id="delay" type="range" min="10" max="500" step="10" value="200" />
     <div class="version">
-      <a href="https://github.com/rwos/gifstopmotion">v84.0</a>
+      <a href="https://github.com/rwos/gifstopmotion">v85.0</a>
     </div>
   </body>
 </html>
