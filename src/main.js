@@ -13,6 +13,74 @@
     <https://developer.mozilla.org/en-US/docs/Web/API/WebRTC_API/Taking_still_photos>
 */
 (function() {
+
+    // redux setup
+    var currentFrame = 0;
+    function getFrameId() {
+        return ++currentFrame;
+    }
+
+    function framesReducer(state, action) {
+        if (!state) {
+            state = [];
+        }
+
+        switch (action.type) {
+            case 'FRAME_ADD':
+                return state.concat({
+                    id: getFrameId(),
+                    frame: action.frame,
+                    canvas: action.canvas
+                });
+            case 'FRAME_REMOVE':
+                return state.filter(function (element) {
+                    return element.id !== action.frameId;
+                });
+            case 'RESET':
+                return [];
+            default:
+                return state
+        }
+    }
+
+    function settingsReducer(state, action) {
+        if (!state) {
+            state = {
+                delay: 200,
+                debug: false,
+                greenscreen: false
+            }
+        }
+
+        switch (action.type) {
+            case 'CHANGE_DELAY':
+                return {
+                    delay: action.value,
+                    debug: state.debug,
+                    greenscreen: state.greenscreen
+                };
+            case 'TOGGLE_DEBUG':
+                return {
+                    delay: state.delay,
+                    debug: !state.debug,
+                    greenscreen: state.greenscreen
+                };
+            case 'TOGGLE_GREENSCREEN':
+                return {
+                    delay: state.delay,
+                    debug: state.debug,
+                    greenscreen: !state.greenscreen
+                };
+            default:
+                return state
+        }
+    }
+
+    window.store = Redux.createStore(Redux.combineReducers({
+        frames: framesReducer,
+        settings: settingsReducer
+    }));
+
     var width = 320;
     var height = 0;
     var streaming = false;
@@ -25,19 +93,8 @@
     var debug = null;
     var framecontainer = null;
     var greenscreen = null;
-    var framesToFrameIndex = [];
-    var frameCounter = 0;
 
     var workerblob = new Blob([document.getElementById('workerscript').textContent], {type: 'text/javascript'});
-
-    var gif = new GIF({
-        quality: 10,
-        workers: 2,
-        workerScript: URL.createObjectURL(workerblob),
-        //transparent: 0xff00ff, XXX OFF for now
-    });
-
-    var delay = 200;
 
     function init() {
         video = document.getElementById('viewfinder');
@@ -47,25 +104,21 @@
         text = document.getElementById('text');
         debug = document.getElementById('debug');
         framecontainer = document.getElementById('framecontainer');
-        document.getElementById('clear').addEventListener('click', function(ev) {
-            clear();
-            ev.preventDefault();
-        });
+        document.getElementById('clear').addEventListener('click', clear);
+
         document.getElementById('greenscreen').addEventListener('click', function(ev) {
             updategreenscreen();
             document.getElementById('greenscreen').className = 'disabled';
-            ev.preventDefault();
+            return toggleGreenscreen();
         });
         document.getElementById('save').addEventListener('click', function(ev) {
             download();
             ev.preventDefault();
         });
-        document.getElementById('delay').addEventListener('change', function(ev) {
-            // XXX: this should reencode the whole thing with that delay
-            delay = parseInt(ev.target.value, 10);
-        });
+        document.getElementById('delay').addEventListener('change', changeDelay);
 
-        navigator.getMedia = (navigator.getUserMedia
+        navigator.getMedia = ((navigator.mediaDevices && navigator.mediaDevices.getUserMedia)
+                           || navigator.getUserMedia
                            || navigator.webkitGetUserMedia
                            || navigator.mozGetUserMedia
                            || navigator.msGetUserMedia);
@@ -91,7 +144,6 @@
             canvas.setAttribute('height', height);
             lastframe.setAttribute('width', width);
             lastframe.setAttribute('height', height);
-            preview.setAttribute('height', height);
             streaming = true;
         }, false);
 
@@ -107,7 +159,7 @@
         }, false);
 
         if (document.location.hash === '#d') {
-            debug.className = '';
+            toggleDebug();
         }
     }
 
@@ -123,8 +175,30 @@
     // main stuff
 
     function clear() {
-        // XXX only method that seemed to work
-        document.location = document.location;
+        store.dispatch({type: 'RESET'});
+        return false;
+    }
+
+    function changeDelay(event) {
+        store.dispatch({
+            type: 'CHANGE_DELAY',
+            value: parseInt(event.target.value, 10)
+        });
+        return false;
+    }
+
+    function toggleDebug(value) {
+        store.dispatch({
+            type: 'TOGGLE_DEBUG'
+        });
+        return false;
+    }
+
+    function toggleGreenscreen() {
+        store.dispatch({
+            type: 'TOGGLE_GREENSCREEN'
+        });
+        return false;
     }
 
     function download() {
@@ -137,9 +211,6 @@
     }
 
     function updategreenscreen() {
-        if (greenscreen) {
-            return;
-        }
         var context = canvas.getContext('2d');
         if (width && height) {
             canvas.width = width;
@@ -150,6 +221,10 @@
     }
 
     function debugcapture(canvas) {
+        if (!store.getState().settings.debug) {
+            return;
+        }
+
         var img = document.createElement('img');
         img.setAttribute('src', canvas.toDataURL('image/png'));
         img.setAttribute('class', 'frame');
@@ -157,9 +232,6 @@
     }
 
     function addframe() {
-        /// XXX move all this document stuff into init
-        document.getElementById('save').className = ''; // enable button
-
         var context = canvas.getContext('2d');
         if (width && height) {
             canvas.width = width;
@@ -168,7 +240,7 @@
             // prepare frame
             context.drawImage(video, 0, 0, width, height);
             // remove background
-            if (greenscreen) {
+            if (store.getState().settings.greenscreen) {
                 debugcapture(greenscreen);
                 context.globalCompositeOperation = 'difference'; /// XXX this is too simplistic
                 context.drawImage(greenscreen, 0, 0, width, height);
@@ -208,65 +280,123 @@
             context.strokeText(text.value, width/2, height-24);
 
             // update transparent last frame overlay
-            lastframe.getContext('2d').clearRect(0, 0, width, height);
-            lastframe.getContext('2d').drawImage(canvas, 0, 0, width, height);
-
-            // add frame to frame list
-            var imgContainer = document.createElement('div');
-            var remove = document.createElement('a');
-            remove.setAttribute('data-frame', frameCounter);
-            remove.setAttribute('class', 'remove-frame');
-            remove.addEventListener('click', function() {
-                this.parentElement.parentElement.removeChild(this.parentElement);
-                if (gif.frames.length <= 1) {
-                    clear();
-                }
-                var frameId = parseInt(this.getAttribute('data-frame'));
-                var frameIndex = framesToFrameIndex.indexOf(frameId);
-                console.log('frame remove', frameId, frameIndex, framesToFrameIndex);
-                gif.frames.splice(frameIndex, 1);
-                framesToFrameIndex.splice(frameIndex, 1);
-                gif.render();
-                gif.on('finished', function(blob) {
-                    preview.removeAttribute('height');
-                    preview.src = URL.createObjectURL(blob);
-                    gif.abort();
-                });
-
-            });
-            console.log('frame added', frameCounter);
-            framesToFrameIndex.push(frameCounter);
-            frameCounter++;
-            var img = document.createElement('img');
-            img.setAttribute('src', canvas.toDataURL('image/png'));
-            img.setAttribute('class', 'frame');
-            imgContainer.appendChild(remove);
-            imgContainer.appendChild(img);
-            framecontainer.appendChild(imgContainer);
-            framecontainer.className = '';
-            img.addEventListener('load', function() {
-                framecontainer.scrollLeft += 9000;
+            store.dispatch({
+                type: 'FRAME_ADD',
+                canvas: clonecanvas(canvas),
+                frame: canvas.toDataURL('image/png')
             });
 
-            // update gif
             if (greenscreen) {
                 context.globalCompositeOperation = 'destination-over';
                 /// XXX: this must match the gifjs "transparent" value
-                context.fillStyle = "rgb(255,0,255)"
+                context.fillStyle = "rgb(255,0,255)";
                 context.fillRect(0, 0, width, height);
                 debugcapture(canvas);
                 context.globalCompositeOperation = 'source-over';
             }
-            gif.addFrame(clonecanvas(canvas), {delay: delay});
+        }
+    }
+
+    var state,
+        gif,
+        frameCounter,
+        frameLength,
+        frameCanvas,
+        frame,
+        frames,
+        delay;
+
+    function buildPreviewFrame(container, frameId, imageSrc, isLast) {
+        var remove = document.createElement('a'),
+            imgContainer = document.createElement('div'),
+            img = document.createElement('img');
+
+        remove.setAttribute('class', 'remove-frame');
+        remove.addEventListener('click', function() {
+            store.dispatch({
+                type: 'FRAME_REMOVE',
+                frameId: parseInt(this.parentElement.getAttribute('data-frame')),
+            });
+        });
+
+        img.setAttribute('src', imageSrc);
+        img.setAttribute('class', 'frame');
+        imgContainer.appendChild(remove);
+        imgContainer.appendChild(img);
+        imgContainer.setAttribute('data-frame', frameId)
+
+        container.appendChild(imgContainer);
+
+        if (isLast) {
+            img.addEventListener('load', function () {
+                container.scrollLeft += 9000;
+            });
+        }
+    }
+
+    store.subscribe(function () {
+        gif = new GIF({
+            quality: 10,
+            workers: 2,
+            workerScript: URL.createObjectURL(workerblob),
+            //transparent: 0xff00ff, XXX OFF for now
+        });
+
+        state = store.getState();
+        frames = state.frames;
+        delay = state.settings.delay;
+        frameLength = frames.length;
+
+        var domFrames = document.querySelectorAll('[data-frame]')
+            domFramesMap = {};
+        for (frameCounter = 0; frameCounter < domFrames.length; frameCounter++) {
+            domFramesMap[domFrames[frameCounter].getAttribute('data-frame')] = domFrames[frameCounter];
+        }
+
+        for (frameCounter = 0; frameCounter < frameLength; frameCounter++) {
+            frameCanvas = frames[frameCounter].canvas;
+            frame = frames[frameCounter].frame
+            frameId = frames[frameCounter].id;
+
+            if (typeof domFramesMap[frameId] === "undefined") {
+                buildPreviewFrame(framecontainer, frameId, frame, frameLength-1 === frameCounter);
+            }
+            gif.addFrame(frameCanvas, {delay: delay});
+            delete domFramesMap[frameId];
+        }
+
+        var toBeDeleted = Object.keys(domFramesMap);
+        for (frameCounter = 0; frameCounter < toBeDeleted.length; frameCounter++) {
+            domFramesMap[toBeDeleted[frameCounter]].parentElement.removeChild(domFramesMap[toBeDeleted[frameCounter]]);
+        }
+
+        if (frames.length) {
+            lastframe.getContext('2d').clearRect(0, 0, width, height);
+            lastframe.getContext('2d').drawImage(frameCanvas, 0, 0, width, height);
+
+            gif.render();
             gif.on('finished', function(blob) {
                 preview.removeAttribute('height');
                 preview.src = '';
                 preview.src = URL.createObjectURL(blob);
                 gif.abort();
             });
-            gif.render();
+
+            document.getElementById('save').className = '';
+            framecontainer.className = '';
+        } else {
+            lastframe.getContext('2d').clearRect(0, 0, width, height);
+
+            preview.src = 'data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==';
+            preview.setAttribute('height', height);
+            document.getElementById('save').className = 'disabled';
+            framecontainer.className = 'disabled';
         }
-    }
+
+        if (state.settings.debug) {
+            debug.className = '';
+        }
+    });
 
     window.addEventListener('load', init, false);
 })();
