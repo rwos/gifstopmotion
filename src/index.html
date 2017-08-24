@@ -22,12 +22,12 @@
     <canvas id="tmp" style="display:none"></canvas>
     <div class="main">
       <div class="preview row">
-        <div>
+        <div class="overlay">
           <canvas class="fg-2 transparent" id="lastframe"></canvas>
           <video class="fg" id="viewfinder">Please browser your update.</video>
           <div class="bg instructions">enable your camera</div>
         </div>
-        <div>
+        <div class="overlay">
           <img class="fg" id="preview" height="1" src="data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==">
           <div class="bg instructions">press space a lot</div>
         </div>
@@ -43,12 +43,10 @@
           <button id="clear">start over</button>
         </div>
       </div>
-      <div class="frames row">
-        <div class="disabled" id="framecontainer"></div>
-      </div>
+      <div class="frames row" id="framecontainer"></div>
     </div>
     <div id="debug" class="disabled"></div> <!--- XXX TODO: remove -->
-    <div class="version">
+    <div class="version row">
       INCLUDE GITREF
     </div>
   </body>

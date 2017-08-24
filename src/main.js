@@ -81,19 +81,11 @@
         settings: settingsReducer
     }));
 
-    var width = 320;
+    var width = 320; /// XXX what do we use this for?
     var height = 0;
-    var streaming = false;
+    var streaming = false; /// XXX and this?
 
     var ELEMENT = {};
-    var video = null;
-    var canvas = null;
-    var lastframe = null;
-    var preview = null;
-    var text = null;
-    var debug = null;
-    var framecontainer = null;
-    var greenscreen = null;
 
     var workerblob = new Blob([document.getElementById('workerscript').textContent], {type: 'text/javascript'});
 
@@ -107,20 +99,22 @@
             debug: document.getElementById('debug'),
             framecontainer: document.getElementById('framecontainer'),
             clear: document.getElementById('clear'),
+            save: document.getElementById('save'),
+            greenscreen: document.getElementById('greenscreen'),
+            delay: document.getElementById('delay'),
         };
-        ELEMENT.clear.addEventListener('click', clear);
 
-        /// XXX integrate this stuff, too
-        document.getElementById('greenscreen').addEventListener('click', function(ev) {
+        ELEMENT.clear.addEventListener('click', clear);
+        ELEMENT.greenscreen.addEventListener('click', function(ev) {
             updategreenscreen();
-            document.getElementById('greenscreen').className = 'disabled';
+            ELEMENT.greenscreen.className = 'disabled';
             return toggleGreenscreen();
         });
-        document.getElementById('save').addEventListener('click', function(ev) {
+        ELEMENT.save.addEventListener('click', function(ev) {
             download();
             ev.preventDefault();
         });
-        document.getElementById('delay').addEventListener('change', changeDelay);
+        ELEMENT.delay.addEventListener('change', changeDelay);
 
         navigator.getMedia = (navigator.getUserMedia
                            || navigator.webkitGetUserMedia
@@ -220,7 +214,7 @@
             ELEMENT.canvas.width = width;
             ELEMENT.canvas.height = height;
             context.drawImage(ELEMENT.video, 0, 0, width, height);
-            greenscreen = clonecanvas(ELEMENT.canvas);
+            ELEMENT.greenscreen = clonecanvas(ELEMENT.canvas);
         }
     }
 
@@ -245,9 +239,9 @@
             context.drawImage(ELEMENT.video, 0, 0, width, height);
             // remove background
             if (store.getState().settings.greenscreen) {
-                debugcapture(greenscreen);
+                debugcapture(ELEMENT.greenscreen);
                 context.globalCompositeOperation = 'difference'; /// XXX this is too simplistic
-                context.drawImage(greenscreen, 0, 0, width, height);
+                context.drawImage(ELEMENT.greenscreen, 0, 0, width, height);
                 debugcapture(ELEMENT.canvas);
                 context.globalCompositeOperation = 'source-over';
                 var map = context.getImageData(0, 0, width, height);
@@ -290,7 +284,7 @@
                 frame: ELEMENT.canvas.toDataURL('image/png')
             });
 
-            if (greenscreen) {
+            if (ELEMENT.greenscreen) {
                 context.globalCompositeOperation = 'destination-over';
                 /// XXX: this must match the gifjs "transparent" value
                 context.fillStyle = "rgb(255,0,255)";
@@ -394,7 +388,7 @@
             ELEMENT.preview.src = 'data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==';
             ELEMENT.preview.setAttribute('height', height);
             document.getElementById('save').className = 'disabled';
-            ELEMENT.framecontainer.className = 'disabled';
+            ELEMENT.framecontainer.className = 'frames row disabled';
         }
 
         if (state.settings.debug) {

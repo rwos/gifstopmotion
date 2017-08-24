@@ -1,3 +1,44 @@
+* {
+    padding: 0;
+    margin: 0;
+}
+
+.row {
+    display: flex;
+    border: 1px solid black;
+}
+
+.row>div {
+    flex: 1;
+}
+
+canvas, video {
+    width: 50%;
+}
+
+.row.frames {
+ overflow-x: scroll;
+}
+
+.overlay > .fg {
+    z-index: 2;
+}
+
+.overlay > .fg-2 {
+    position: absolute;
+    z-index: 2;
+}
+
+.overlay > .bg {
+    position: absolute;
+    top: 50%;
+    z-index: -999;
+}
+
+.transparent {
+    opacity: 0.5;
+}
+
 /*
     https://color.adobe.com/sandy-stone-beach-ocean-diver-color-theme-15325
 
@@ -6,7 +47,7 @@
     E6E2AF
     046380
     002F2F
-*/
+
 
 html {
     background: #046380;
@@ -184,3 +225,6 @@ img:hover + .hover, .hover:hover {
     bottom: 2px;
     right: 2px;
 }
+*/
+    
+    
