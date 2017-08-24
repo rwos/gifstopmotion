@@ -1,0 +1,13 @@
+engines:
+  csslint:
+    enabled: true
+  duplication:
+    enabled: true
+  eslint:
+    enabled: true
+ratings:
+  paths:
+  - "**.css"
+  - "**.js"
+exclude_paths:
+  - "3rd/"
