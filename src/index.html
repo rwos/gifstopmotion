@@ -20,44 +20,34 @@
 
   <body>
     <canvas id="tmp" style="display:none"></canvas>
-    <table class="main">
-      <tr>
-        <td width="50%">
-          <div>
-            <div class="overlay">
-              <canvas class="fg-2 transparent" id="lastframe"></canvas>
-              <video class="fg" id="viewfinder">Please browser your update.</video>
-              <div class="bg instructions">enable your camera</div>
-            </div>
-          </div>
-        </td>
-        <td width="50%">
-          <div>
-            <div class="overlay">
-              <img class="fg" id="preview" height="1" src="data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==">
-              <div class="hover">
-                <button id="save" class="disabled">download</button>
-                <button id="clear">start over</button>
-              </div>
-              <div class="bg instructions">press space a lot</div>
-            </div>
-          </div>
-        </td>
-      </tr>
-      <tr>
-        <td colspan="2">
+    <div class="main">
+      <div class="preview row">
+        <div>
+          <canvas class="fg-2 transparent" id="lastframe"></canvas>
+          <video class="fg" id="viewfinder">Please browser your update.</video>
+          <div class="bg instructions">enable your camera</div>
+        </div>
+        <div>
+          <img class="fg" id="preview" height="1" src="data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==">
+          <div class="bg instructions">press space a lot</div>
+        </div>
+      </div>
+      <div class="controls row">
+        <div>
           <textarea id="text" placeholder="caption (optional)"></textarea>
           <button class="disabled" id="greenscreen">make the current frame transparent (experimental)</button>
-        </td>
-      </tr>
-      <tr>
-        <td colspan="2">
-          <div class="disabled" id="framecontainer"></div>
-        </td>
-      </tr>
-    </table>
-    <div id="debug" class="disabled"></div>
-    <input style="display: none" id="delay" type="range" min="10" max="500" step="10" value="200" />
+        </div>
+        <div>
+          <input id="delay" type="range" min="10" max="500" step="10" value="200" />
+          <button id="save" class="disabled">download</button>
+          <button id="clear">start over</button>
+        </div>
+      </div>
+      <div class="frames row">
+        <div class="disabled" id="framecontainer"></div>
+      </div>
+    </div>
+    <div id="debug" class="disabled"></div> <!--- XXX TODO: remove -->
     <div class="version">
       INCLUDE GITREF
     </div>
