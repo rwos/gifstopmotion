@@ -857,25 +857,20 @@ Utils.clonecanvas = function(oldcanvas) {
     return newcanvas;
 };
 
+Utils.addCaption = function(context, text) {
+    context.textAlign = 'center';
+    context.font = 'bold 24px sans';
+    context.fillStyle = 'white';
+    context.strokeStyle = '1px solid black';
+    context.fillText(text, context.width/2, context.height-24);
+    context.strokeText(text, context.width/2, context.height-24);
+};
+
 
 //function o
 // TODO: get UserMedia
 // clonecanvas
 // maybe createElement - build DOM element from object
-/*
-    Copyright 2015-2017 by Richard Wossal <richard@r-wos.org>
-
-    Permission to use, copy, modify, distribute, and sell this software
-    and its documentation for any purpose is hereby granted without fee,
-    provided that the above copyright notice appear in all copies and
-    that both that copyright notice and this permission notice appear in
-    supporting documentation.  No representations are made about the
-    suitability of this software for any purpose.  It is provided "as
-    is" without express or implied warranty.
-
-    Some of this is from an MDN article (code in the public domain)
-    <https://developer.mozilla.org/en-US/docs/Web/API/WebRTC_API/Taking_still_photos>
-*/
 /*
     Copyright 2015 by Richard Wossal <richard@r-wos.org>
 
@@ -925,7 +920,6 @@ Utils.clonecanvas = function(oldcanvas) {
         if (!state) {
             state = {
                 delay: 200,
-                debug: false,
                 greenscreen: false
             }
         }
@@ -934,19 +928,11 @@ Utils.clonecanvas = function(oldcanvas) {
             case 'CHANGE_DELAY':
                 return {
                     delay: action.value,
-                    debug: state.debug,
-                    greenscreen: state.greenscreen
-                };
-            case 'TOGGLE_DEBUG':
-                return {
-                    delay: state.delay,
-                    debug: !state.debug,
                     greenscreen: state.greenscreen
                 };
             case 'TOGGLE_GREENSCREEN':
                 return {
                     delay: state.delay,
-                    debug: state.debug,
                     greenscreen: !state.greenscreen
                 };
             default:
@@ -954,7 +940,7 @@ Utils.clonecanvas = function(oldcanvas) {
         }
     }
 
-    window.store = Redux.createStore(Redux.combineReducers({
+    window.STORE = Redux.createStore(Redux.combineReducers({
         frames: framesReducer,
         settings: settingsReducer
     }));
@@ -982,17 +968,17 @@ Utils.clonecanvas = function(oldcanvas) {
             video: 'viewfinder',
         });
 
-        ELEMENT.clear.addEventListener('click', clear);
+        ELEMENT.clear.addEventListener('click', ACTION.clear);
         ELEMENT.greenscreen.addEventListener('click', function(ev) {
             updategreenscreen();
             ELEMENT.greenscreen.className = 'disabled';
-            return toggleGreenscreen();
+            return ACTION.toggleGreenscreen();
         });
         ELEMENT.save.addEventListener('click', function(ev) {
-            download();
+            ACTION.download();
             ev.preventDefault();
         });
-        ELEMENT.delay.addEventListener('change', changeDelay);
+        ELEMENT.delay.addEventListener('change', ACTION.changeDelay);
 
         Utils.initCamera(ELEMENT.video);
 
@@ -1016,42 +1002,33 @@ Utils.clonecanvas = function(oldcanvas) {
                 ev.preventDefault();
             }
         }, false);
-
-        if (document.location.hash === '#d') {
-            toggleDebug();
-        }
     }
 
     // main stuff
 
-    function clear() {
-        store.dispatch({type: 'RESET'});
+    var ACTION = {};
+
+    ACTION.clear = function() {
+        STORE.dispatch({type: 'RESET'});
         return false;
     }
 
-    function changeDelay(event) {
-        store.dispatch({
+    ACTION.changeDelay = function(event) {
+        STORE.dispatch({
             type: 'CHANGE_DELAY',
             value: parseInt(event.target.value, 10)
         });
         return false;
     }
 
-    function toggleDebug(value) {
-        store.dispatch({
-            type: 'TOGGLE_DEBUG'
-        });
-        return false;
-    }
-
-    function toggleGreenscreen() {
-        store.dispatch({
+    ACTION.toggleGreenscreen = function() {
+        STORE.dispatch({
             type: 'TOGGLE_GREENSCREEN'
         });
         return false;
     }
 
-    function download() {
+    ACTION.download = function() {
         var a = Utils.makeElement('a', {
             download: 'gifstopmotion-' + Date.now() + '.gif',
             href: ELEMENT.preview.src,
@@ -1073,7 +1050,7 @@ Utils.clonecanvas = function(oldcanvas) {
 
     /*** XXX REMOVE DEBUG STUFF ***/
     function debugcapture(canvas) {
-        if (!store.getState().settings.debug) {
+        if (!STORE.getState().settings.debug) {
             return;
         }
 
@@ -1092,7 +1069,7 @@ Utils.clonecanvas = function(oldcanvas) {
             // prepare frame
             context.drawImage(ELEMENT.video, 0, 0, width, height);
             // remove background
-            if (store.getState().settings.greenscreen) {
+            if (STORE.getState().settings.greenscreen) {
                 debugcapture(ELEMENT.greenscreen);
                 context.globalCompositeOperation = 'difference'; /// XXX this is too simplistic
                 context.drawImage(ELEMENT.greenscreen, 0, 0, width, height);
@@ -1123,16 +1100,10 @@ Utils.clonecanvas = function(oldcanvas) {
                 context.drawImage(ELEMENT.video, 0, 0, width, height);
                 context.globalCompositeOperation = 'source-over';
             }
-            // add caption
-            context.textAlign = 'center';
-            context.font = 'bold 24px sans';
-            context.fillStyle = 'white';
-            context.strokeStyle = '1px solid black';
-            context.fillText(ELEMENT.text.value, width/2, height-24);
-            context.strokeText(ELEMENT.text.value, width/2, height-24);
+            Utils.addCaption(context, ELEMENT.text.value);
 
             // update transparent last frame overlay
-            store.dispatch({
+            STORE.dispatch({
                 type: 'FRAME_ADD',
                 canvas: Utils.clonecanvas(ELEMENT.canvas),
                 frame: ELEMENT.canvas.toDataURL('image/png')
@@ -1160,13 +1131,14 @@ Utils.clonecanvas = function(oldcanvas) {
 
     function buildPreviewFrame(container, frameId, imageSrc, isLast) {
 
-        var remove = Utils.makeElement('a', {'class': 'remove-frame'}, {
-            click: function() {
-                store.dispatch({
-                    type: 'FRAME_REMOVE',
-                    frameId: parseInt(this.parentElement.getAttribute('data-frame')),
-                });
-            },
+        var remove = Utils.makeElement('a', {
+            'class': 'remove-frame',
+        });
+        remove.addEventListener('click', function() {
+            STORE.dispatch({
+                type: 'FRAME_REMOVE',
+                frameId: parseInt(this.parentElement.getAttribute('data-frame')),
+            });
         });
 
         var img = Utils.makeElement('img', {
@@ -1188,7 +1160,7 @@ Utils.clonecanvas = function(oldcanvas) {
         }
     }
 
-    store.subscribe(function () {
+    STORE.subscribe(function () {
         gif = new GIF({
             quality: 10,
             workers: 2,
@@ -1196,7 +1168,7 @@ Utils.clonecanvas = function(oldcanvas) {
             //transparent: 0xff00ff, XXX OFF for now
         });
 
-        state = store.getState();
+        state = STORE.getState();
         frames = state.frames;
         delay = state.settings.delay;
         frameLength = frames.length;
@@ -1518,7 +1490,7 @@ img:hover + .hover, .hover:hover {
     </div>
     <div id="debug" class="disabled"></div> <!--- XXX TODO: remove -->
     <div class="version row">
-      <a href="https://github.com/rwos/gifstopmotion">v89.0</a>
+      <a href="https://github.com/rwos/gifstopmotion">v90.0</a>
     </div>
   </body>
 </html>

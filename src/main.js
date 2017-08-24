@@ -47,7 +47,6 @@
         if (!state) {
             state = {
                 delay: 200,
-                debug: false,
                 greenscreen: false
             }
         }
@@ -56,19 +55,11 @@
             case 'CHANGE_DELAY':
                 return {
                     delay: action.value,
-                    debug: state.debug,
-                    greenscreen: state.greenscreen
-                };
-            case 'TOGGLE_DEBUG':
-                return {
-                    delay: state.delay,
-                    debug: !state.debug,
                     greenscreen: state.greenscreen
                 };
             case 'TOGGLE_GREENSCREEN':
                 return {
                     delay: state.delay,
-                    debug: state.debug,
                     greenscreen: !state.greenscreen
                 };
             default:
@@ -76,7 +67,7 @@
         }
     }
 
-    window.store = Redux.createStore(Redux.combineReducers({
+    window.STORE = Redux.createStore(Redux.combineReducers({
         frames: framesReducer,
         settings: settingsReducer
     }));
@@ -104,17 +95,17 @@
             video: 'viewfinder',
         });
 
-        ELEMENT.clear.addEventListener('click', clear);
+        ELEMENT.clear.addEventListener('click', ACTION.clear);
         ELEMENT.greenscreen.addEventListener('click', function(ev) {
             updategreenscreen();
             ELEMENT.greenscreen.className = 'disabled';
-            return toggleGreenscreen();
+            return ACTION.toggleGreenscreen();
         });
         ELEMENT.save.addEventListener('click', function(ev) {
-            download();
+            ACTION.download();
             ev.preventDefault();
         });
-        ELEMENT.delay.addEventListener('change', changeDelay);
+        ELEMENT.delay.addEventListener('change', ACTION.changeDelay);
 
         Utils.initCamera(ELEMENT.video);
 
@@ -138,42 +129,33 @@
                 ev.preventDefault();
             }
         }, false);
-
-        if (document.location.hash === '#d') {
-            toggleDebug();
-        }
     }
 
     // main stuff
 
-    function clear() {
-        store.dispatch({type: 'RESET'});
+    var ACTION = {};
+
+    ACTION.clear = function() {
+        STORE.dispatch({type: 'RESET'});
         return false;
     }
 
-    function changeDelay(event) {
-        store.dispatch({
+    ACTION.changeDelay = function(event) {
+        STORE.dispatch({
             type: 'CHANGE_DELAY',
             value: parseInt(event.target.value, 10)
         });
         return false;
     }
 
-    function toggleDebug(value) {
-        store.dispatch({
-            type: 'TOGGLE_DEBUG'
-        });
-        return false;
-    }
-
-    function toggleGreenscreen() {
-        store.dispatch({
+    ACTION.toggleGreenscreen = function() {
+        STORE.dispatch({
             type: 'TOGGLE_GREENSCREEN'
         });
         return false;
     }
 
-    function download() {
+    ACTION.download = function() {
         var a = Utils.makeElement('a', {
             download: 'gifstopmotion-' + Date.now() + '.gif',
             href: ELEMENT.preview.src,
@@ -195,7 +177,7 @@
 
     /*** XXX REMOVE DEBUG STUFF ***/
     function debugcapture(canvas) {
-        if (!store.getState().settings.debug) {
+        if (!STORE.getState().settings.debug) {
             return;
         }
 
@@ -214,7 +196,7 @@
             // prepare frame
             context.drawImage(ELEMENT.video, 0, 0, width, height);
             // remove background
-            if (store.getState().settings.greenscreen) {
+            if (STORE.getState().settings.greenscreen) {
                 debugcapture(ELEMENT.greenscreen);
                 context.globalCompositeOperation = 'difference'; /// XXX this is too simplistic
                 context.drawImage(ELEMENT.greenscreen, 0, 0, width, height);
@@ -245,16 +227,10 @@
                 context.drawImage(ELEMENT.video, 0, 0, width, height);
                 context.globalCompositeOperation = 'source-over';
             }
-            // add caption
-            context.textAlign = 'center';
-            context.font = 'bold 24px sans';
-            context.fillStyle = 'white';
-            context.strokeStyle = '1px solid black';
-            context.fillText(ELEMENT.text.value, width/2, height-24);
-            context.strokeText(ELEMENT.text.value, width/2, height-24);
+            Utils.addCaption(context, ELEMENT.text.value);
 
             // update transparent last frame overlay
-            store.dispatch({
+            STORE.dispatch({
                 type: 'FRAME_ADD',
                 canvas: Utils.clonecanvas(ELEMENT.canvas),
                 frame: ELEMENT.canvas.toDataURL('image/png')
@@ -286,7 +262,7 @@
             'class': 'remove-frame',
         });
         remove.addEventListener('click', function() {
-            store.dispatch({
+            STORE.dispatch({
                 type: 'FRAME_REMOVE',
                 frameId: parseInt(this.parentElement.getAttribute('data-frame')),
             });
@@ -311,7 +287,7 @@
         }
     }
 
-    store.subscribe(function () {
+    STORE.subscribe(function () {
         gif = new GIF({
             quality: 10,
             workers: 2,
@@ -319,7 +295,7 @@
             //transparent: 0xff00ff, XXX OFF for now
         });
 
-        state = store.getState();
+        state = STORE.getState();
         frames = state.frames;
         delay = state.settings.delay;
         frameLength = frames.length;

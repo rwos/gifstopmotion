@@ -55,6 +55,15 @@ Utils.clonecanvas = function(oldcanvas) {
     return newcanvas;
 };
 
+Utils.addCaption = function(context, text) {
+    context.textAlign = 'center';
+    context.font = 'bold 24px sans';
+    context.fillStyle = 'white';
+    context.strokeStyle = '1px solid black';
+    context.fillText(text, context.width/2, context.height-24);
+    context.strokeText(text, context.width/2, context.height-24);
+};
+
 
 //function o
 // TODO: get UserMedia
