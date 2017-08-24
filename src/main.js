@@ -90,19 +90,19 @@
     var workerblob = new Blob([document.getElementById('workerscript').textContent], {type: 'text/javascript'});
 
     function init() {
-        ELEMENT = {
-            video: document.getElementById('viewfinder'),
-            canvas: document.getElementById('tmp'),
-            lastframe: document.getElementById('lastframe'),
-            preview: document.getElementById('preview'),
-            text: document.getElementById('text'),
-            debug: document.getElementById('debug'),
-            framecontainer: document.getElementById('framecontainer'),
-            clear: document.getElementById('clear'),
-            save: document.getElementById('save'),
-            greenscreen: document.getElementById('greenscreen'),
-            delay: document.getElementById('delay'),
-        };
+        ELEMENT = Utils.getElements({
+            canvas: 'tmp',
+            clear: 'clear',
+            debug: 'debug',
+            delay: 'delay',
+            framecontainer: 'framecontainer',
+            greenscreen: 'greenscreen',
+            lastframe: 'lastframe',
+            preview: 'preview',
+            save: 'save',
+            text: 'text',
+            video: 'viewfinder',
+        });
 
         ELEMENT.clear.addEventListener('click', clear);
         ELEMENT.greenscreen.addEventListener('click', function(ev) {
@@ -116,19 +116,7 @@
         });
         ELEMENT.delay.addEventListener('change', changeDelay);
 
-        navigator.getMedia = (navigator.getUserMedia
-                           || navigator.webkitGetUserMedia
-                           || navigator.mozGetUserMedia
-                           || navigator.msGetUserMedia);
-        navigator.getMedia({video: true, audio: false}, function(stream) {
-            if (navigator.mozGetUserMedia) {
-                ELEMENT.video.mozSrcObject = stream;
-            } else {
-                var vendorURL = window.URL || window.webkitURL;
-                ELEMENT.video.src = vendorURL.createObjectURL(stream);
-            }
-            ELEMENT.video.play();
-        }, console.log);
+        Utils.initCamera(ELEMENT.video);
 
         ELEMENT.video.addEventListener('canplay', function(ev) {
             if (streaming) {
@@ -138,10 +126,6 @@
             if (isNaN(height)) { // FF bug, apparently
                 height = width / (4/3);
             }
-            ELEMENT.canvas.setAttribute('width', width);
-            ELEMENT.canvas.setAttribute('height', height);
-            ELEMENT.lastframe.setAttribute('width', width);
-            ELEMENT.lastframe.setAttribute('height', height);
             streaming = true;
         }, false);
 
@@ -151,7 +135,6 @@
             }
             if (ev.charCode === 32 || ev.keyCode === 32) {
                 addframe();
-                console.log("preventdefault");
                 ev.preventDefault();
             }
         }, false);
@@ -159,15 +142,6 @@
         if (document.location.hash === '#d') {
             toggleDebug();
         }
-    }
-
-    function clonecanvas(oldcanvas) {
-        var newcanvas = document.createElement('canvas');
-        var context = newcanvas.getContext('2d');
-        newcanvas.width = oldcanvas.width;
-        newcanvas.height = oldcanvas.height;
-        context.drawImage(oldcanvas, 0, 0);
-        return newcanvas;
     }
 
     // main stuff
@@ -200,10 +174,11 @@
     }
 
     function download() {
-        var a = document.createElement('a');
-        a.setAttribute('download', 'gif.gif');
-        a.href = ELEMENT.preview.src;
-        a.style.display = 'none';
+        var a = Utils.makeElement('a', {
+            download: 'gifstopmotion-' + Date.now() + '.gif',
+            href: ELEMENT.preview.src,
+            style: 'display: none;',
+        });
         document.body.appendChild(a);
         a.click();
     }
@@ -214,10 +189,11 @@
             ELEMENT.canvas.width = width;
             ELEMENT.canvas.height = height;
             context.drawImage(ELEMENT.video, 0, 0, width, height);
-            ELEMENT.greenscreen = clonecanvas(ELEMENT.canvas);
+            ELEMENT.greenscreen = Utils.clonecanvas(ELEMENT.canvas);
         }
     }
 
+    /*** XXX REMOVE DEBUG STUFF ***/
     function debugcapture(canvas) {
         if (!store.getState().settings.debug) {
             return;
@@ -280,7 +256,7 @@
             // update transparent last frame overlay
             store.dispatch({
                 type: 'FRAME_ADD',
-                canvas: clonecanvas(ELEMENT.canvas),
+                canvas: Utils.clonecanvas(ELEMENT.canvas),
                 frame: ELEMENT.canvas.toDataURL('image/png')
             });
 
@@ -305,11 +281,10 @@
         delay;
 
     function buildPreviewFrame(container, frameId, imageSrc, isLast) {
-        var remove = document.createElement('a'),
-            imgContainer = document.createElement('div'),
-            img = document.createElement('img');
 
-        remove.setAttribute('class', 'remove-frame');
+        var remove = Utils.makeElement('a', {
+            'class': 'remove-frame',
+        });
         remove.addEventListener('click', function() {
             store.dispatch({
                 type: 'FRAME_REMOVE',
@@ -317,11 +292,15 @@
             });
         });
 
-        img.setAttribute('src', imageSrc);
-        img.setAttribute('class', 'frame');
+        var img = Utils.makeElement('img', {
+            'src': imageSrc,
+            'class': 'frame'
+        });
+        var imgContainer = Utils.makeElement('div', {
+            'data-frame': frameId
+        });
         imgContainer.appendChild(remove);
         imgContainer.appendChild(img);
-        imgContainer.setAttribute('data-frame', frameId)
 
         container.appendChild(imgContainer);
 
