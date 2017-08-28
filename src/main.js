@@ -336,7 +336,7 @@
             });
 
             document.getElementById('save').className = '';
-            ELEMENT.framecontainer.className = '';
+            ELEMENT.framecontainer.className = 'frames row';
         } else {
             ELEMENT.lastframe.getContext('2d').clearRect(0, 0, width, height);
 

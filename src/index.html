@@ -33,14 +33,21 @@
         </div>
       </div>
       <div class="controls row">
-        <div>
+        <div class="col">
           <textarea id="text" placeholder="caption (optional)"></textarea>
-          <button class="disabled" id="greenscreen">make the current frame transparent (experimental)</button>
+          <button style="display:none" class="disabled" id="greenscreen">greenscreen (do not use)</button>
         </div>
-        <div>
-          <input id="delay" type="range" min="10" max="500" step="10" value="200" />
-          <button id="save" class="disabled">download</button>
-          <button id="clear">start over</button>
+        <div class="col">
+          <div class="row">
+            <label for="delay" class="noflex">
+              speed&nbsp;
+            </label>
+            <input id="delay" name="delay" type="range" min="10" max="500" step="10" value="200" />
+          </div>
+          <div class="row">
+            <button id="save" class="disabled">download</button>
+            <button id="clear">start over</button>
+          </div>
         </div>
       </div>
       <div class="frames row" id="framecontainer"></div>
