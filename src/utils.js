@@ -63,9 +63,3 @@ Utils.addCaption = function(context, text) {
     context.fillText(text, context.width/2, context.height-24);
     context.strokeText(text, context.width/2, context.height-24);
 };
-
-
-//function o
-// TODO: get UserMedia
-// clonecanvas
-// maybe createElement - build DOM element from object
