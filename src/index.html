@@ -19,6 +19,14 @@
   </head>
 
   <body>
+    <div class="version row">
+      <div>
+        gifstopmotion - gif the means of production back to the working classes&nbsp;
+      </div>
+      <div class="noflex">
+        INCLUDE GITREF
+      </div>
+    </div>
     <canvas id="tmp" style="display:none"></canvas>
     <div class="main">
       <div class="preview row">
@@ -40,7 +48,7 @@
         <div class="col">
           <div class="row">
             <label for="delay" class="noflex">
-              speed&nbsp;
+              slowness&nbsp;
             </label>
             <input id="delay" name="delay" type="range" min="10" max="500" step="10" value="200" />
           </div>
@@ -53,8 +61,5 @@
       <div class="frames row" id="framecontainer"></div>
     </div>
     <div id="debug" class="disabled"></div> <!--- XXX TODO: remove -->
-    <div class="version row">
-      INCLUDE GITREF
-    </div>
   </body>
 </html>
