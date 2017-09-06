@@ -93,6 +93,7 @@
             save: 'save',
             text: 'text',
             video: 'viewfinder',
+            capture: 'capture',
         });
 
         ELEMENT.clear.addEventListener('click', ACTION.clear);
@@ -119,6 +120,11 @@
             }
             streaming = true;
         }, false);
+
+        ELEMENT.capture.addEventListener('click', function(ev) {
+            addframe();
+            ev.preventDefault();
+        });
 
         document.body.addEventListener('keydown', function(ev) {
             if (ev.target.nodeName === 'TEXTAREA') {

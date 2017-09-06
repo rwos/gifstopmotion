@@ -960,6 +960,7 @@ Utils.addCaption = function(context, text) {
             save: 'save',
             text: 'text',
             video: 'viewfinder',
+            capture: 'capture',
         });
 
         ELEMENT.clear.addEventListener('click', ACTION.clear);
@@ -986,6 +987,11 @@ Utils.addCaption = function(context, text) {
             }
             streaming = true;
         }, false);
+
+        ELEMENT.capture.addEventListener('click', function(ev) {
+            addframe();
+            ev.preventDefault();
+        });
 
         document.body.addEventListener('keydown', function(ev) {
             if (ev.target.nodeName === 'TEXTAREA') {
@@ -1247,8 +1253,8 @@ Utils.addCaption = function(context, text) {
 }
 
 .preview img, .preview video {
-    min-width: 90%;
-    max-width: 90%;
+    min-width: 100%;
+    max-width: 100%;
 }
 
 .row.frames {
@@ -1297,7 +1303,6 @@ body {
 }
 
 .row {
-    margin: 10px;
     padding: 10px;
 }
 
@@ -1310,22 +1315,19 @@ body {
     border-radius: 8px;
 }
 
-.preview.row {
-    padding: 30px 10px;
+.preview.row>div, .controls.row>div  {
+    margin: 20px;
 }
 
-.preview, .controls>div>div, .row.frames {
-    border-radius: 3px;
-    border: 1px solid #222;
+.divider {
+    border-left: 1px solid #222;
     box-shadow: inset 0 0 2px rgba(0, 0, 0, 0.3), 0 0 2px rgba(0, 0, 0, 0.3);
+    width: 1px;
+    max-width: 1px
 }
 
 .controls div>div {
     padding: 20px;
-}
-
-.controls div>textarea {
-    margin: 10px;
 }
 
 .row.frames {
@@ -1371,8 +1373,10 @@ textarea {
 
 button {
     z-index: 10;
-    margin: 0 10px 10px 0;
+    margin: 0 0 20px;
     height: 37.29px;
+    min-height: 37.29px;
+    max-height: 37.29px;
     line-height: 36.3px;
     position: relative;
     cursor: pointer;
@@ -1503,6 +1507,7 @@ input[type=range]:focus::-ms-fill-lower {
 input[type=range]:focus::-ms-fill-upper {
   background: #572f36;
 }
+    
     </style>
   </head>
 
@@ -1512,7 +1517,7 @@ input[type=range]:focus::-ms-fill-upper {
         gifstopmotion
       </div>
       <div class="noflex">
-        <a href="https://github.com/rwos/gifstopmotion">v96.0</a>
+        <a href="https://github.com/rwos/gifstopmotion">v97.0</a>
       </div>
     </div>
     <canvas id="tmp" style="display:none"></canvas>
@@ -1523,6 +1528,7 @@ input[type=range]:focus::-ms-fill-upper {
           <video class="fg" id="viewfinder">Please browser your update.</video>
           <div class="bg instructions">enable your camera</div>
         </div>
+        <div class="divider"></div>
         <div class="overlay">
           <img class="fg" id="preview" height="1" src="data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==">
           <div class="bg instructions">press space a lot</div>
@@ -1530,9 +1536,11 @@ input[type=range]:focus::-ms-fill-upper {
       </div>
       <div class="controls row">
         <div class="col">
+          <button id="capture">CAPTURE</button>
           <textarea id="text" placeholder="caption (optional)"></textarea>
           <button style="display:none" class="disabled" id="greenscreen">greenscreen (do not use)</button>
         </div>
+        <div class="divider"></div>
         <div class="col">
           <div class="row">
             <label for="delay" class="noflex">
@@ -1542,6 +1550,7 @@ input[type=range]:focus::-ms-fill-upper {
           </div>
           <div class="row">
             <button id="save" class="disabled">download</button>
+            &nbsp;
             <button id="clear">start over</button>
           </div>
         </div>

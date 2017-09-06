@@ -35,6 +35,7 @@
           <video class="fg" id="viewfinder">Please browser your update.</video>
           <div class="bg instructions">enable your camera</div>
         </div>
+        <div class="divider"></div>
         <div class="overlay">
           <img class="fg" id="preview" height="1" src="data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==">
           <div class="bg instructions">press space a lot</div>
@@ -42,9 +43,11 @@
       </div>
       <div class="controls row">
         <div class="col">
+          <button id="capture">CAPTURE</button>
           <textarea id="text" placeholder="caption (optional)"></textarea>
           <button style="display:none" class="disabled" id="greenscreen">greenscreen (do not use)</button>
         </div>
+        <div class="divider"></div>
         <div class="col">
           <div class="row">
             <label for="delay" class="noflex">
@@ -54,6 +57,7 @@
           </div>
           <div class="row">
             <button id="save" class="disabled">download</button>
+            &nbsp;
             <button id="clear">start over</button>
           </div>
         </div>
