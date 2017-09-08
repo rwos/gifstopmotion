@@ -84,7 +84,6 @@
         ELEMENT = Utils.getElements({
             canvas: 'tmp',
             clear: 'clear',
-            debug: 'debug',
             delay: 'delay',
             framecontainer: 'framecontainer',
             greenscreen: 'greenscreen',
@@ -181,18 +180,6 @@
         }
     }
 
-    /*** XXX REMOVE DEBUG STUFF ***/
-    function debugcapture(canvas) {
-        if (!STORE.getState().settings.debug) {
-            return;
-        }
-
-        var img = document.createElement('img');
-        img.setAttribute('src', canvas.toDataURL('image/png'));
-        img.setAttribute('class', 'frame');
-        ELEMENT.debug.appendChild(img);
-    }
-
     function addframe() {
         var context = ELEMENT.canvas.getContext('2d');
         if (width && height) {
@@ -203,10 +190,8 @@
             context.drawImage(ELEMENT.video, 0, 0, width, height);
             // remove background
             if (STORE.getState().settings.greenscreen) {
-                debugcapture(ELEMENT.greenscreen);
                 context.globalCompositeOperation = 'difference'; /// XXX this is too simplistic
                 context.drawImage(ELEMENT.greenscreen, 0, 0, width, height);
-                debugcapture(ELEMENT.canvas);
                 context.globalCompositeOperation = 'source-over';
                 var map = context.getImageData(0, 0, width, height);
                 var l = map.data.length / 4;
@@ -228,7 +213,6 @@
                     }
                 }
                 context.putImageData(map, 0, 0);
-                debugcapture(ELEMENT.canvas);
                 context.globalCompositeOperation = 'source-in';
                 context.drawImage(ELEMENT.video, 0, 0, width, height);
                 context.globalCompositeOperation = 'source-over';
@@ -247,7 +231,6 @@
                 /// XXX: this must match the gifjs "transparent" value
                 context.fillStyle = "rgb(255,0,255)";
                 context.fillRect(0, 0, width, height);
-                debugcapture(ELEMENT.canvas);
                 context.globalCompositeOperation = 'source-over';
             }
         }
@@ -350,10 +333,6 @@
             ELEMENT.preview.setAttribute('height', height);
             document.getElementById('save').className = 'disabled';
             ELEMENT.framecontainer.className = 'frames row disabled';
-        }
-
-        if (state.settings.debug) {
-            ELEMENT.debug.className = '';
         }
     });
 

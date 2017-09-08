@@ -951,7 +951,6 @@ Utils.addCaption = function(context, text) {
         ELEMENT = Utils.getElements({
             canvas: 'tmp',
             clear: 'clear',
-            debug: 'debug',
             delay: 'delay',
             framecontainer: 'framecontainer',
             greenscreen: 'greenscreen',
@@ -1048,18 +1047,6 @@ Utils.addCaption = function(context, text) {
         }
     }
 
-    /*** XXX REMOVE DEBUG STUFF ***/
-    function debugcapture(canvas) {
-        if (!STORE.getState().settings.debug) {
-            return;
-        }
-
-        var img = document.createElement('img');
-        img.setAttribute('src', canvas.toDataURL('image/png'));
-        img.setAttribute('class', 'frame');
-        ELEMENT.debug.appendChild(img);
-    }
-
     function addframe() {
         var context = ELEMENT.canvas.getContext('2d');
         if (width && height) {
@@ -1070,10 +1057,8 @@ Utils.addCaption = function(context, text) {
             context.drawImage(ELEMENT.video, 0, 0, width, height);
             // remove background
             if (STORE.getState().settings.greenscreen) {
-                debugcapture(ELEMENT.greenscreen);
                 context.globalCompositeOperation = 'difference'; /// XXX this is too simplistic
                 context.drawImage(ELEMENT.greenscreen, 0, 0, width, height);
-                debugcapture(ELEMENT.canvas);
                 context.globalCompositeOperation = 'source-over';
                 var map = context.getImageData(0, 0, width, height);
                 var l = map.data.length / 4;
@@ -1095,7 +1080,6 @@ Utils.addCaption = function(context, text) {
                     }
                 }
                 context.putImageData(map, 0, 0);
-                debugcapture(ELEMENT.canvas);
                 context.globalCompositeOperation = 'source-in';
                 context.drawImage(ELEMENT.video, 0, 0, width, height);
                 context.globalCompositeOperation = 'source-over';
@@ -1114,7 +1098,6 @@ Utils.addCaption = function(context, text) {
                 /// XXX: this must match the gifjs "transparent" value
                 context.fillStyle = "rgb(255,0,255)";
                 context.fillRect(0, 0, width, height);
-                debugcapture(ELEMENT.canvas);
                 context.globalCompositeOperation = 'source-over';
             }
         }
@@ -1217,10 +1200,6 @@ Utils.addCaption = function(context, text) {
             ELEMENT.preview.setAttribute('height', height);
             document.getElementById('save').className = 'disabled';
             ELEMENT.framecontainer.className = 'frames row disabled';
-        }
-
-        if (state.settings.debug) {
-            ELEMENT.debug.className = '';
         }
     });
 
@@ -1339,8 +1318,8 @@ body {
 }
 
 .row.frames>div {
-    padding-right: 10px;   
-    padding-left: 10px;   
+    padding-right: 10px;
+    padding-left: 10px;
     margin-bottom: 4px;
     flex-grow: 0;
 }
@@ -1507,7 +1486,6 @@ input[type=range]:focus::-ms-fill-lower {
 input[type=range]:focus::-ms-fill-upper {
   background: #572f36;
 }
-    
     </style>
   </head>
 
@@ -1517,7 +1495,7 @@ input[type=range]:focus::-ms-fill-upper {
         gifstopmotion
       </div>
       <div class="noflex">
-        <a href="https://github.com/rwos/gifstopmotion">v97.0</a>
+        <a href="https://github.com/rwos/gifstopmotion">v99.0</a>
       </div>
     </div>
     <canvas id="tmp" style="display:none"></canvas>
@@ -1557,6 +1535,5 @@ input[type=range]:focus::-ms-fill-upper {
       </div>
       <div class="frames row" id="framecontainer"></div>
     </div>
-    <div id="debug" class="disabled"></div> <!--- XXX TODO: remove -->
   </body>
 </html>
