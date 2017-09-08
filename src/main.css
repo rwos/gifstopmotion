@@ -1,186 +1,279 @@
-/*
-    https://color.adobe.com/sandy-stone-beach-ocean-diver-color-theme-15325
+/*** layout ***/
 
-    EFECCA
-    A7A37E
-    E6E2AF
-    046380
-    002F2F
-*/
-
-html {
-    background: #046380;
-    color: #EFECCA;
-    font-family: sans;
-    font-size: 18px;
-}
-
-html, body, table, td {
+* {
     padding: 0;
     margin: 0;
-    border: none;
-    border-spacing: 0;
-    border-collapse: collapse;
 }
 
-table {
-    table-layout: fixed;
+.row {
+    display: flex;
 }
 
-#viewfinder {
-    display: inline-block;
+.col {
+    display: flex;
+    flex-flow: column;
 }
 
-#viewfinder, #lastframe, #preview {
-    border: none;
-    min-height: 240px;
+.row>*, .col>* {
+    flex: 1;
 }
 
-button {
-    border: none;
-    color: #EFECCA;
-    background: #046380;
-    font-size: 18px;
-    transition: background 0.4s, color 0.4s, transform 0.2s;
-    cursor: pointer;
+.noflex {
+    flex: 0;
 }
-button:hover {
-    transform: rotate(-3deg);
-    rotation: 20deg;
-    background: #EFECCA;
-    color: #046380;
+
+.preview img, .preview video {
+    min-width: 100%;
+    max-width: 100%;
+}
+
+.row.frames {
+    overflow-x: auto;
 }
 
 .overlay {
-    display: inline-block;
     position: relative;
+    text-align: center;
 }
-.overlay > .fg {
-    z-index: 2;
-}
-.overlay > .fg-2 {
-    position: absolute;
-    z-index: 2;
-}
+
 .overlay > .bg {
     position: absolute;
     top: 50%;
     z-index: -999;
+    text-align: center;
+    width: 100%;
 }
+
+.overlay > .fg {
+    z-index: 1;
+}
+
+.overlay > .fg-2 {
+    position: absolute;
+    z-index: 2;
+}
+
+/*** style ***/
+
 .transparent {
     opacity: 0.5;
 }
 
-tr, td {
-    vertical-align: top;
+body {
+    background-color: #727272;
 }
 
-.main, .main * .overlay, #viewfinder, #lastframe, #preview {
-    width: 100%;
+* {
+    color: #0e0e0e;
+    font-size: 13.2px;
+    letter-spacing: .1em;
+    text-shadow: 0 1px 0 rgba(255, 255, 255, 0.1);
+    font-weight: bold;
+    font-family: sans-serif;
 }
 
-.hover {
-    opacity: 0;
-    transition: opacity 0.4s, top 0.2s;
-    position: absolute;
-    background: #002F2F;
-    top: -10px;
-    width: 100%;
-    padding: 20px 0;
-    text-align: center;
-}
-
-img:hover + .hover, .hover:hover {
-    top: 50%;
-    opacity: 0.9;
-    display: block;
-}
-
-.hover > button + button {
-    margin-left: 40px;
-}
-
-.hover > button {
-    opacity: 1 ;
-    padding: 10px 20px;
-    border-radius: 2px;
-}
-
-.disabled {
-    display: none;
-}
-
-#framecontainer {
-    overflow: hidden;
-    white-space: nowrap;
-    background: #002F2F;
+.row {
     padding: 10px;
-    padding-bottom: 2px;
 }
 
-#framecontainer:hover {
-    overflow-x: auto;
+.version.row * {
+    color: rgba(255, 55, 56, 0.93);
+    text-shadow: 1.8px 1.8px 5.9px rgba(255, 0, 0, 0.49), 0px 0px 1.8px rgba(255, 26, 26, 0.49);
 }
 
-#framecontainer > div {
-    display: inline-block;
-    position: relative;
+.preview img, .preview video {
+    border-radius: 8px;
 }
 
-.frame {
+.preview.row>div, .controls.row>div  {
+    margin: 20px;
+}
+
+.divider {
+    border-left: 1px solid #222;
+    box-shadow: inset 0 0 2px rgba(0, 0, 0, 0.3), 0 0 2px rgba(0, 0, 0, 0.3);
+    width: 1px;
+    max-width: 1px
+}
+
+.controls div>div {
+    padding: 20px;
+}
+
+.row.frames {
+    min-height: 100px;
+}
+
+.row.frames img {
     height: 100px;
-    margin-right: 15px;
-    border-radius: 20px;
+}
+
+.row.frames>div {
+    padding-right: 10px;
+    padding-left: 10px;
+    margin-bottom: 4px;
+    flex-grow: 0;
 }
 
 .remove-frame {
-    position: absolute;
-    top: -4px;
-    right: 8px;
-    width: 16px;
-    height: 16px;
-    border-radius: 8px;
-    border: solid 1px;
     cursor: pointer;
-    line-height: 16px;
-    text-align: center;
 }
 
 .remove-frame:after {
-    content: "x";
+    content: 'X';
+    color: ##211114;
+    margin-left: 124px;
 }
 
-.instructions {
+.remove-frame:hover {
+    text-shadow: 1.8px 1.8px 5.9px rgba(255, 0, 0, 0.49), 0px 0px 1.8px rgba(255, 26, 26, 0.49);
+    color: rgba(255, 55, 56, 0.93);
+}
+
+textarea {
+    background: #46262c;
+    border-radius: 8px;
+    border: 0px solid #010101;
+    padding: 20px;
+    text-shadow: 1.8px 1.8px 5.9px rgba(255, 0, 0, 0.49), 0px 0px 1.8px rgba(255, 26, 26, 0.49);
+    color: rgba(255, 55, 56, 0.93);
+}
+
+/*** button stuff partly based on https://codepen.io/wallas/full/lFABr/ ***/
+
+button {
+    z-index: 10;
+    margin: 0 0 20px;
+    height: 37.29px;
+    min-height: 37.29px;
+    max-height: 37.29px;
+    line-height: 36.3px;
+    position: relative;
+    cursor: pointer;
+    background-image: linear-gradient(#444, #222);
+    border-radius: 3px;
+    box-shadow: 0 -1px 0 rgba(0, 0, 0, 0.2), 0 0 0 1px rgba(0, 0, 0, 0.3), 0 1px 0 rgba(255, 255, 255, 0.05), 0 0 3px rgba(255, 255, 255, 0.2);
+}
+
+button:after {
+    z-index: -1;
+    content: '';
+    cursor: pointer;
+    top: 1px;
     width: 100%;
-    text-align: center;
-    font-size: 40px;
+    height: 33px;
+    display: block;
+    position: absolute;
+    background-image: linear-gradient(#666, #555);
+    box-shadow: inset 0 2px 1px -1px rgba(255, 255, 255, 0.2), inset 0 -2px 1px -1px rgba(0, 0, 0, 0.2), 0 12px 12px rgba(0, 0, 0, 0.5), 0 4px 6px rgba(0, 0, 0, 0.3);
+    border-radius: 2px;
 }
 
-#text {
-    box-sizing: border-box;
-    width: 100%;
-    border: none;
-    min-height: 80px;
-    font-size: 40px;
-    padding: 10px 20px;
-    background: #046380;
-    border: 4px solid #046380;
-    transition: background 0.4s, border 0.4s;
-    border-radius: 4px;
-}
-#text:hover {
-    border: 4px solid #EFECCA;
-}
-#text:focus {
-    background: #EFECCA;
-    border: 4px solid #EFECCA;
+button:hover {
+    color: orange;
+    text-shadow: 0 -1px 0 yellow, 0 0px 30px yellow, 0 0px 50px yellow;
 }
 
-.version * {
-    color: #EFECCA !important;
-    font-size: small;
-    position: fixed;
-    text-decoration: none;
-    bottom: 2px;
-    right: 2px;
+button:hover:after {
+    background-size: 100%;
+    background-image: linear-gradient(#999, #555);
+}
+
+button:active {
+    color: yellow;
+    text-shadow: 0 -1px 0 yellow, 0 0px 30px yellow, 0 0px 50px yellow;
+    box-shadow: 0 -1px 0 rgba(255, 193,0, 0.2), 0 0 0 1px rgba(0, 0, 0, 0.4), 0 1px 0 rgba(255, 255, 255, 0.05), 0 0 20px rgba(255, 193,0, 0.1), 0 0 30px rgba(255, 193,0, 0.1);
+}
+
+button:active:after {
+    background-size: 100%;
+    background-image: linear-gradient(#888, #333);
+    box-shadow: inset 0 5px 6px rgba(0, 0, 0, 0.3), inset 0 0 4px rgba(0, 0, 0, 0.9), 0 0 0 black;
+}
+
+/*** range style - via http://danielstern.ca/range.css/#/ ***/
+
+input[type=range] {
+  -webkit-appearance: none;
+  width: 100%;
+  height: 20px;
+}
+input[type=range]:focus {
+  outline: none;
+}
+input[type=range]::-webkit-slider-runnable-track {
+  width: 100%;
+  height: 31.2px;
+  cursor: pointer;
+  box-shadow: 0px 0px 1.1px #000000, 0px 0px 0px #0d0d0d;
+  background: #46262c;
+  border-radius: 0px;
+  border: 0px solid #010101;
+}
+input[type=range]::-webkit-slider-thumb {
+  box-shadow: 1.8px 1.8px 5.9px rgba(255, 0, 0, 0.49), 0px 0px 1.8px rgba(255, 26, 26, 0.49);
+  border: 2.9px solid #941e00;
+  height: 25px;
+  width: 34px;
+  border-radius: 28px;
+  background: rgba(255, 55, 56, 0.93);
+  cursor: pointer;
+  -webkit-appearance: none;
+  margin-top: 3.1px;
+}
+input[type=range]:focus::-webkit-slider-runnable-track {
+  background: #572f36;
+}
+input[type=range]::-moz-range-track {
+  width: 100%;
+  height: 31.2px;
+  cursor: pointer;
+  box-shadow: 0px 0px 1.1px #000000, 0px 0px 0px #0d0d0d;
+  background: #46262c;
+  border-radius: 0px;
+  border: 0px solid #010101;
+}
+input[type=range]::-moz-range-thumb {
+  box-shadow: 1.8px 1.8px 5.9px rgba(255, 0, 0, 0.49), 0px 0px 1.8px rgba(255, 26, 26, 0.49);
+  border: 2.9px solid #941e00;
+  height: 25px;
+  width: 34px;
+  border-radius: 28px;
+  background: rgba(255, 55, 56, 0.93);
+  cursor: pointer;
+}
+input[type=range]::-ms-track {
+  width: 100%;
+  height: 31.2px;
+  cursor: pointer;
+  background: transparent;
+  border-color: transparent;
+  color: transparent;
+}
+input[type=range]::-ms-fill-lower {
+  background: #351d22;
+  border: 0px solid #010101;
+  border-radius: 0px;
+  box-shadow: 0px 0px 1.1px #000000, 0px 0px 0px #0d0d0d;
+}
+input[type=range]::-ms-fill-upper {
+  background: #46262c;
+  border: 0px solid #010101;
+  border-radius: 0px;
+  box-shadow: 0px 0px 1.1px #000000, 0px 0px 0px #0d0d0d;
+}
+input[type=range]::-ms-thumb {
+  box-shadow: 1.8px 1.8px 5.9px rgba(255, 0, 0, 0.49), 0px 0px 1.8px rgba(255, 26, 26, 0.49);
+  border: 2.9px solid #941e00;
+  width: 34px;
+  border-radius: 28px;
+  background: rgba(255, 55, 56, 0.93);
+  cursor: pointer;
+  height: 25px;
+}
+input[type=range]:focus::-ms-fill-lower {
+  background: #46262c;
+}
+input[type=range]:focus::-ms-fill-upper {
+  background: #572f36;
 }

@@ -801,6 +801,71 @@ Object.defineProperty(exports, '__esModule', { value: true });
 
 })));
 /*
+    Copyright 2015-2017 by Richard Wossal <richard@r-wos.org>
+
+    Permission to use, copy, modify, distribute, and sell this software
+    and its documentation for any purpose is hereby granted without fee,
+    provided that the above copyright notice appear in all copies and
+    that both that copyright notice and this permission notice appear in
+    supporting documentation.  No representations are made about the
+    suitability of this software for any purpose.  It is provided "as
+    is" without express or implied warranty.
+*/
+
+var Utils = {};
+
+Utils.makeElement = function(tag, options) {
+    var el = document.createElement(tag);
+    if (options) {
+        for (var key in options) {
+            el.setAttribute(key, options[key]);
+        }
+    }
+    return el;
+};
+
+Utils.getElements = function(spec) {
+    var out = {};
+    for (var key in spec) {
+        out[key] = document.getElementById(spec[key]);
+    }
+    return out;
+};
+
+Utils.initCamera = function(videoElement) {
+    navigator.getMedia = (navigator.getUserMedia
+                       || navigator.webkitGetUserMedia
+                       || navigator.mozGetUserMedia
+                       || navigator.msGetUserMedia);
+    navigator.getMedia({video: true, audio: false}, function(stream) {
+        if (navigator.mozGetUserMedia) {
+            videoElement.mozSrcObject = stream;
+        } else {
+            var vendorURL = window.URL || window.webkitURL;
+            videoElement.src = vendorURL.createObjectURL(stream);
+        }
+        videoElement.play();
+    }, console.log);
+};
+
+Utils.clonecanvas = function(oldcanvas) {
+    var newcanvas = document.createElement('canvas');
+    var context = newcanvas.getContext('2d');
+    newcanvas.width = oldcanvas.width;
+    newcanvas.height = oldcanvas.height;
+    context.drawImage(oldcanvas, 0, 0);
+    return newcanvas;
+};
+
+Utils.addCaption = function(context, text, width, height) {
+    context.textAlign = 'center';
+    context.font = 'bold 24px sans';
+    context.fillStyle = 'white';
+    context.strokeStyle = '1px solid black';
+    context.fillText(text, width/2, height-24);
+    context.strokeText(text, width/2, height-24);
+};
+/*
     Copyright 2015 by Richard Wossal <richard@r-wos.org>
 
     Permission to use, copy, modify, distribute, and sell this software
@@ -849,7 +914,6 @@ Object.defineProperty(exports, '__esModule', { value: true });
         if (!state) {
             state = {
                 delay: 200,
-                debug: false,
                 greenscreen: false
             }
         }
@@ -858,19 +922,11 @@ Object.defineProperty(exports, '__esModule', { value: true });
             case 'CHANGE_DELAY':
                 return {
                     delay: action.value,
-                    debug: state.debug,
-                    greenscreen: state.greenscreen
-                };
-            case 'TOGGLE_DEBUG':
-                return {
-                    delay: state.delay,
-                    debug: !state.debug,
                     greenscreen: state.greenscreen
                 };
             case 'TOGGLE_GREENSCREEN':
                 return {
                     delay: state.delay,
-                    debug: state.debug,
                     greenscreen: !state.greenscreen
                 };
             default:
@@ -878,75 +934,63 @@ Object.defineProperty(exports, '__esModule', { value: true });
         }
     }
 
-    window.store = Redux.createStore(Redux.combineReducers({
+    window.STORE = Redux.createStore(Redux.combineReducers({
         frames: framesReducer,
         settings: settingsReducer
     }));
 
-    var width = 320;
+    var width = 320; /// XXX what do we use this for?
     var height = 0;
-    var streaming = false;
+    var streaming = false; /// XXX and this?
 
-    var video = null;
-    var canvas = null;
-    var lastframe = null;
-    var preview = null;
-    var text = null;
-    var debug = null;
-    var framecontainer = null;
-    var greenscreen = null;
+    var ELEMENT = {};
 
     var workerblob = new Blob([document.getElementById('workerscript').textContent], {type: 'text/javascript'});
 
     function init() {
-        video = document.getElementById('viewfinder');
-        canvas = document.getElementById('tmp');
-        lastframe = document.getElementById('lastframe');
-        preview = document.getElementById('preview');
-        text = document.getElementById('text');
-        debug = document.getElementById('debug');
-        framecontainer = document.getElementById('framecontainer');
-        document.getElementById('clear').addEventListener('click', clear);
-
-        document.getElementById('greenscreen').addEventListener('click', function(ev) {
-            updategreenscreen();
-            document.getElementById('greenscreen').className = 'disabled';
-            return toggleGreenscreen();
+        ELEMENT = Utils.getElements({
+            canvas: 'tmp',
+            clear: 'clear',
+            delay: 'delay',
+            framecontainer: 'framecontainer',
+            greenscreen: 'greenscreen',
+            lastframe: 'lastframe',
+            preview: 'preview',
+            save: 'save',
+            text: 'text',
+            video: 'viewfinder',
+            capture: 'capture',
         });
-        document.getElementById('save').addEventListener('click', function(ev) {
-            download();
+
+        ELEMENT.clear.addEventListener('click', ACTION.clear);
+        ELEMENT.greenscreen.addEventListener('click', function(ev) {
+            updategreenscreen();
+            ELEMENT.greenscreen.className = 'disabled';
+            return ACTION.toggleGreenscreen();
+        });
+        ELEMENT.save.addEventListener('click', function(ev) {
+            ACTION.download();
             ev.preventDefault();
         });
-        document.getElementById('delay').addEventListener('change', changeDelay);
+        ELEMENT.delay.addEventListener('change', ACTION.changeDelay);
 
-        navigator.getMedia = (navigator.getUserMedia
-                           || navigator.webkitGetUserMedia
-                           || navigator.mozGetUserMedia
-                           || navigator.msGetUserMedia);
-        navigator.getMedia({video: true, audio: false}, function(stream) {
-            if (navigator.mozGetUserMedia) {
-                video.mozSrcObject = stream;
-            } else {
-                var vendorURL = window.URL || window.webkitURL;
-                video.src = vendorURL.createObjectURL(stream);
-            }
-            video.play();
-        }, console.log);
+        Utils.initCamera(ELEMENT.video);
 
-        video.addEventListener('canplay', function(ev) {
+        ELEMENT.video.addEventListener('canplay', function(ev) {
             if (streaming) {
                 return;
             }
-            height = video.videoHeight / (video.videoWidth/width);
+            height = ELEMENT.video.videoHeight / (ELEMENT.video.videoWidth/width);
             if (isNaN(height)) { // FF bug, apparently
                 height = width / (4/3);
             }
-            canvas.setAttribute('width', width);
-            canvas.setAttribute('height', height);
-            lastframe.setAttribute('width', width);
-            lastframe.setAttribute('height', height);
             streaming = true;
         }, false);
+
+        ELEMENT.capture.addEventListener('click', function(ev) {
+            addframe();
+            ev.preventDefault();
+        });
 
         document.body.addEventListener('keydown', function(ev) {
             if (ev.target.nodeName === 'TEXTAREA') {
@@ -954,98 +998,76 @@ Object.defineProperty(exports, '__esModule', { value: true });
             }
             if (ev.charCode === 32 || ev.keyCode === 32) {
                 addframe();
-                console.log("preventdefault");
                 ev.preventDefault();
             }
         }, false);
 
-        if (document.location.hash === '#d') {
-            toggleDebug();
-        }
-    }
-
-    function clonecanvas(oldcanvas) {
-        var newcanvas = document.createElement('canvas');
-        var context = newcanvas.getContext('2d');
-        newcanvas.width = oldcanvas.width;
-        newcanvas.height = oldcanvas.height;
-        context.drawImage(oldcanvas, 0, 0);
-        return newcanvas;
+        var updateLastFrameSize = function() {
+            ELEMENT.lastframe.style.width = ELEMENT.video.scrollWidth + 'px';
+            ELEMENT.lastframe.style.height = ELEMENT.video.scrollHeight + 'px';
+            window.requestAnimationFrame(updateLastFrameSize);
+        };
+        window.requestAnimationFrame(updateLastFrameSize);
     }
 
     // main stuff
 
-    function clear() {
-        store.dispatch({type: 'RESET'});
+    var ACTION = {};
+
+    ACTION.clear = function() {
+        STORE.dispatch({type: 'RESET'});
         return false;
     }
 
-    function changeDelay(event) {
-        store.dispatch({
+    ACTION.changeDelay = function(event) {
+        STORE.dispatch({
             type: 'CHANGE_DELAY',
             value: parseInt(event.target.value, 10)
         });
         return false;
     }
 
-    function toggleDebug(value) {
-        store.dispatch({
-            type: 'TOGGLE_DEBUG'
-        });
-        return false;
-    }
-
-    function toggleGreenscreen() {
-        store.dispatch({
+    ACTION.toggleGreenscreen = function() {
+        STORE.dispatch({
             type: 'TOGGLE_GREENSCREEN'
         });
         return false;
     }
 
-    function download() {
-        var a = document.createElement('a');
-        a.setAttribute('download', 'gif.gif');
-        a.href = preview.src;
-        a.style.display = 'none';
+    ACTION.download = function() {
+        var a = Utils.makeElement('a', {
+            download: 'gifstopmotion-' + Date.now() + '.gif',
+            href: ELEMENT.preview.src,
+            style: 'display: none;',
+        });
         document.body.appendChild(a);
         a.click();
     }
 
     function updategreenscreen() {
-        var context = canvas.getContext('2d');
+        var context = ELEMENT.canvas.getContext('2d');
         if (width && height) {
-            canvas.width = width;
-            canvas.height = height;
-            context.drawImage(video, 0, 0, width, height);
-            greenscreen = clonecanvas(canvas);
+            ELEMENT.canvas.width = width;
+            ELEMENT.canvas.height = height;
+            context.drawImage(ELEMENT.video, 0, 0, width, height);
+            ELEMENT.greenscreen = Utils.clonecanvas(ELEMENT.canvas);
         }
-    }
-
-    function debugcapture(canvas) {
-        if (!store.getState().settings.debug) {
-            return;
-        }
-
-        var img = document.createElement('img');
-        img.setAttribute('src', canvas.toDataURL('image/png'));
-        img.setAttribute('class', 'frame');
-        debug.appendChild(img);
     }
 
     function addframe() {
-        var context = canvas.getContext('2d');
+        var context = ELEMENT.canvas.getContext('2d');
         if (width && height) {
-            canvas.width = width;
-            canvas.height = height;
+            ELEMENT.canvas.width = width;
+            ELEMENT.canvas.height = height;
+            ELEMENT.lastframe.width = width;
+            ELEMENT.lastframe.height = height;
 
             // prepare frame
-            context.drawImage(video, 0, 0, width, height);
+            context.drawImage(ELEMENT.video, 0, 0, width, height);
             // remove background
-            if (store.getState().settings.greenscreen) {
-                debugcapture(greenscreen);
+            if (STORE.getState().settings.greenscreen) {
                 context.globalCompositeOperation = 'difference'; /// XXX this is too simplistic
-                context.drawImage(greenscreen, 0, 0, width, height);
-                debugcapture(canvas);
+                context.drawImage(ELEMENT.greenscreen, 0, 0, width, height);
                 context.globalCompositeOperation = 'source-over';
                 var map = context.getImageData(0, 0, width, height);
                 var l = map.data.length / 4;
@@ -1067,32 +1089,24 @@ Object.defineProperty(exports, '__esModule', { value: true });
                     }
                 }
                 context.putImageData(map, 0, 0);
-                debugcapture(canvas);
                 context.globalCompositeOperation = 'source-in';
-                context.drawImage(video, 0, 0, width, height);
+                context.drawImage(ELEMENT.video, 0, 0, width, height);
                 context.globalCompositeOperation = 'source-over';
             }
-            // add caption
-            context.textAlign = 'center';
-            context.font = 'bold 24px sans';
-            context.fillStyle = 'white';
-            context.strokeStyle = '1px solid black';
-            context.fillText(text.value, width/2, height-24);
-            context.strokeText(text.value, width/2, height-24);
+            Utils.addCaption(context, ELEMENT.text.value, width, height);
 
             // update transparent last frame overlay
-            store.dispatch({
+            STORE.dispatch({
                 type: 'FRAME_ADD',
-                canvas: clonecanvas(canvas),
-                frame: canvas.toDataURL('image/png')
+                canvas: Utils.clonecanvas(ELEMENT.canvas),
+                frame: ELEMENT.canvas.toDataURL('image/png')
             });
 
-            if (greenscreen) {
+            if (ELEMENT.greenscreen) {
                 context.globalCompositeOperation = 'destination-over';
                 /// XXX: this must match the gifjs "transparent" value
                 context.fillStyle = "rgb(255,0,255)";
                 context.fillRect(0, 0, width, height);
-                debugcapture(canvas);
                 context.globalCompositeOperation = 'source-over';
             }
         }
@@ -1108,23 +1122,26 @@ Object.defineProperty(exports, '__esModule', { value: true });
         delay;
 
     function buildPreviewFrame(container, frameId, imageSrc, isLast) {
-        var remove = document.createElement('a'),
-            imgContainer = document.createElement('div'),
-            img = document.createElement('img');
 
-        remove.setAttribute('class', 'remove-frame');
+        var remove = Utils.makeElement('a', {
+            'class': 'remove-frame',
+        });
         remove.addEventListener('click', function() {
-            store.dispatch({
+            STORE.dispatch({
                 type: 'FRAME_REMOVE',
                 frameId: parseInt(this.parentElement.getAttribute('data-frame')),
             });
         });
 
-        img.setAttribute('src', imageSrc);
-        img.setAttribute('class', 'frame');
+        var img = Utils.makeElement('img', {
+            'src': imageSrc,
+            'class': 'frame'
+        });
+        var imgContainer = Utils.makeElement('div', {
+            'data-frame': frameId
+        });
         imgContainer.appendChild(remove);
         imgContainer.appendChild(img);
-        imgContainer.setAttribute('data-frame', frameId)
 
         container.appendChild(imgContainer);
 
@@ -1135,7 +1152,7 @@ Object.defineProperty(exports, '__esModule', { value: true });
         }
     }
 
-    store.subscribe(function () {
+    STORE.subscribe(function () {
         gif = new GIF({
             quality: 10,
             workers: 2,
@@ -1143,7 +1160,7 @@ Object.defineProperty(exports, '__esModule', { value: true });
             //transparent: 0xff00ff, XXX OFF for now
         });
 
-        state = store.getState();
+        state = STORE.getState();
         frames = state.frames;
         delay = state.settings.delay;
         frameLength = frames.length;
@@ -1160,7 +1177,7 @@ Object.defineProperty(exports, '__esModule', { value: true });
             frameId = frames[frameCounter].id;
 
             if (typeof domFramesMap[frameId] === "undefined") {
-                buildPreviewFrame(framecontainer, frameId, frame, frameLength-1 === frameCounter);
+                buildPreviewFrame(ELEMENT.framecontainer, frameId, frame, frameLength-1 === frameCounter);
             }
             gif.addFrame(frameCanvas, {delay: delay});
             delete domFramesMap[frameId];
@@ -1172,30 +1189,26 @@ Object.defineProperty(exports, '__esModule', { value: true });
         }
 
         if (frames.length) {
-            lastframe.getContext('2d').clearRect(0, 0, width, height);
-            lastframe.getContext('2d').drawImage(frameCanvas, 0, 0, width, height);
+            ELEMENT.lastframe.getContext('2d').clearRect(0, 0, width, height);
+            ELEMENT.lastframe.getContext('2d').drawImage(frameCanvas, 0, 0, width, height);
 
             gif.render();
             gif.on('finished', function(blob) {
-                preview.removeAttribute('height');
-                preview.src = '';
-                preview.src = URL.createObjectURL(blob);
+                ELEMENT.preview.removeAttribute('height');
+                ELEMENT.preview.src = '';
+                ELEMENT.preview.src = URL.createObjectURL(blob);
                 gif.abort();
             });
 
             document.getElementById('save').className = '';
-            framecontainer.className = '';
+            ELEMENT.framecontainer.className = 'frames row';
         } else {
-            lastframe.getContext('2d').clearRect(0, 0, width, height);
+            ELEMENT.lastframe.getContext('2d').clearRect(0, 0, width, height);
 
-            preview.src = 'data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==';
-            preview.setAttribute('height', height);
+            ELEMENT.preview.src = 'data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==';
+            ELEMENT.preview.setAttribute('height', height);
             document.getElementById('save').className = 'disabled';
-            framecontainer.className = 'disabled';
-        }
-
-        if (state.settings.debug) {
-            debug.className = '';
+            ELEMENT.framecontainer.className = 'frames row disabled';
         }
     });
 
@@ -1203,237 +1216,333 @@ Object.defineProperty(exports, '__esModule', { value: true });
 })();
     </script>
     <style>
-/*
-    https://color.adobe.com/sandy-stone-beach-ocean-diver-color-theme-15325
+/*** layout ***/
 
-    EFECCA
-    A7A37E
-    E6E2AF
-    046380
-    002F2F
-*/
-
-html {
-    background: #046380;
-    color: #EFECCA;
-    font-family: sans;
-    font-size: 18px;
-}
-
-html, body, table, td {
+* {
     padding: 0;
     margin: 0;
-    border: none;
-    border-spacing: 0;
-    border-collapse: collapse;
 }
 
-table {
-    table-layout: fixed;
+.row {
+    display: flex;
 }
 
-#viewfinder {
-    display: inline-block;
+.col {
+    display: flex;
+    flex-flow: column;
 }
 
-#viewfinder, #lastframe, #preview {
-    border: none;
-    min-height: 240px;
+.row>*, .col>* {
+    flex: 1;
 }
 
-button {
-    border: none;
-    color: #EFECCA;
-    background: #046380;
-    font-size: 18px;
-    transition: background 0.4s, color 0.4s, transform 0.2s;
-    cursor: pointer;
+.noflex {
+    flex: 0;
 }
-button:hover {
-    transform: rotate(-3deg);
-    rotation: 20deg;
-    background: #EFECCA;
-    color: #046380;
+
+.preview img, .preview video {
+    min-width: 100%;
+    max-width: 100%;
+}
+
+.row.frames {
+    overflow-x: auto;
 }
 
 .overlay {
-    display: inline-block;
     position: relative;
+    text-align: center;
 }
-.overlay > .fg {
-    z-index: 2;
-}
-.overlay > .fg-2 {
-    position: absolute;
-    z-index: 2;
-}
+
 .overlay > .bg {
     position: absolute;
     top: 50%;
     z-index: -999;
+    text-align: center;
+    width: 100%;
 }
+
+.overlay > .fg {
+    z-index: 1;
+}
+
+.overlay > .fg-2 {
+    position: absolute;
+    z-index: 2;
+}
+
+/*** style ***/
+
 .transparent {
     opacity: 0.5;
 }
 
-tr, td {
-    vertical-align: top;
+body {
+    background-color: #727272;
 }
 
-.main, .main * .overlay, #viewfinder, #lastframe, #preview {
-    width: 100%;
+* {
+    color: #0e0e0e;
+    font-size: 13.2px;
+    letter-spacing: .1em;
+    text-shadow: 0 1px 0 rgba(255, 255, 255, 0.1);
+    font-weight: bold;
+    font-family: sans-serif;
 }
 
-.hover {
-    opacity: 0;
-    transition: opacity 0.4s, top 0.2s;
-    position: absolute;
-    background: #002F2F;
-    top: -10px;
-    width: 100%;
-    padding: 20px 0;
-    text-align: center;
-}
-
-img:hover + .hover, .hover:hover {
-    top: 50%;
-    opacity: 0.9;
-    display: block;
-}
-
-.hover > button + button {
-    margin-left: 40px;
-}
-
-.hover > button {
-    opacity: 1 ;
-    padding: 10px 20px;
-    border-radius: 2px;
-}
-
-.disabled {
-    display: none;
-}
-
-#framecontainer {
-    overflow: hidden;
-    white-space: nowrap;
-    background: #002F2F;
+.row {
     padding: 10px;
-    padding-bottom: 2px;
 }
 
-#framecontainer:hover {
-    overflow-x: auto;
+.version.row * {
+    color: rgba(255, 55, 56, 0.93);
+    text-shadow: 1.8px 1.8px 5.9px rgba(255, 0, 0, 0.49), 0px 0px 1.8px rgba(255, 26, 26, 0.49);
 }
 
-#framecontainer > div {
-    display: inline-block;
-    position: relative;
+.preview img, .preview video {
+    border-radius: 8px;
 }
 
-.frame {
+.preview.row>div, .controls.row>div  {
+    margin: 20px;
+}
+
+.divider {
+    border-left: 1px solid #222;
+    box-shadow: inset 0 0 2px rgba(0, 0, 0, 0.3), 0 0 2px rgba(0, 0, 0, 0.3);
+    width: 1px;
+    max-width: 1px
+}
+
+.controls div>div {
+    padding: 20px;
+}
+
+.row.frames {
+    min-height: 100px;
+}
+
+.row.frames img {
     height: 100px;
-    margin-right: 15px;
-    border-radius: 20px;
+}
+
+.row.frames>div {
+    padding-right: 10px;
+    padding-left: 10px;
+    margin-bottom: 4px;
+    flex-grow: 0;
 }
 
 .remove-frame {
-    position: absolute;
-    top: -4px;
-    right: 8px;
-    width: 16px;
-    height: 16px;
-    border-radius: 8px;
-    border: solid 1px;
     cursor: pointer;
-    line-height: 16px;
-    text-align: center;
 }
 
 .remove-frame:after {
-    content: "x";
+    content: 'X';
+    color: ##211114;
+    margin-left: 124px;
 }
 
-.instructions {
+.remove-frame:hover {
+    text-shadow: 1.8px 1.8px 5.9px rgba(255, 0, 0, 0.49), 0px 0px 1.8px rgba(255, 26, 26, 0.49);
+    color: rgba(255, 55, 56, 0.93);
+}
+
+textarea {
+    background: #46262c;
+    border-radius: 8px;
+    border: 0px solid #010101;
+    padding: 20px;
+    text-shadow: 1.8px 1.8px 5.9px rgba(255, 0, 0, 0.49), 0px 0px 1.8px rgba(255, 26, 26, 0.49);
+    color: rgba(255, 55, 56, 0.93);
+}
+
+/*** button stuff partly based on https://codepen.io/wallas/full/lFABr/ ***/
+
+button {
+    z-index: 10;
+    margin: 0 0 20px;
+    height: 37.29px;
+    min-height: 37.29px;
+    max-height: 37.29px;
+    line-height: 36.3px;
+    position: relative;
+    cursor: pointer;
+    background-image: linear-gradient(#444, #222);
+    border-radius: 3px;
+    box-shadow: 0 -1px 0 rgba(0, 0, 0, 0.2), 0 0 0 1px rgba(0, 0, 0, 0.3), 0 1px 0 rgba(255, 255, 255, 0.05), 0 0 3px rgba(255, 255, 255, 0.2);
+}
+
+button:after {
+    z-index: -1;
+    content: '';
+    cursor: pointer;
+    top: 1px;
     width: 100%;
-    text-align: center;
-    font-size: 40px;
+    height: 33px;
+    display: block;
+    position: absolute;
+    background-image: linear-gradient(#666, #555);
+    box-shadow: inset 0 2px 1px -1px rgba(255, 255, 255, 0.2), inset 0 -2px 1px -1px rgba(0, 0, 0, 0.2), 0 12px 12px rgba(0, 0, 0, 0.5), 0 4px 6px rgba(0, 0, 0, 0.3);
+    border-radius: 2px;
 }
 
-#text {
-    box-sizing: border-box;
-    width: 100%;
-    border: none;
-    min-height: 80px;
-    font-size: 40px;
-    padding: 10px 20px;
-    background: #046380;
-    border: 4px solid #046380;
-    transition: background 0.4s, border 0.4s;
-    border-radius: 4px;
-}
-#text:hover {
-    border: 4px solid #EFECCA;
-}
-#text:focus {
-    background: #EFECCA;
-    border: 4px solid #EFECCA;
+button:hover {
+    color: orange;
+    text-shadow: 0 -1px 0 yellow, 0 0px 30px yellow, 0 0px 50px yellow;
 }
 
-.version * {
-    color: #EFECCA !important;
-    font-size: small;
-    position: fixed;
-    text-decoration: none;
-    bottom: 2px;
-    right: 2px;
+button:hover:after {
+    background-size: 100%;
+    background-image: linear-gradient(#999, #555);
+}
+
+button:active {
+    color: yellow;
+    text-shadow: 0 -1px 0 yellow, 0 0px 30px yellow, 0 0px 50px yellow;
+    box-shadow: 0 -1px 0 rgba(255, 193,0, 0.2), 0 0 0 1px rgba(0, 0, 0, 0.4), 0 1px 0 rgba(255, 255, 255, 0.05), 0 0 20px rgba(255, 193,0, 0.1), 0 0 30px rgba(255, 193,0, 0.1);
+}
+
+button:active:after {
+    background-size: 100%;
+    background-image: linear-gradient(#888, #333);
+    box-shadow: inset 0 5px 6px rgba(0, 0, 0, 0.3), inset 0 0 4px rgba(0, 0, 0, 0.9), 0 0 0 black;
+}
+
+/*** range style - via http://danielstern.ca/range.css/#/ ***/
+
+input[type=range] {
+  -webkit-appearance: none;
+  width: 100%;
+  height: 20px;
+}
+input[type=range]:focus {
+  outline: none;
+}
+input[type=range]::-webkit-slider-runnable-track {
+  width: 100%;
+  height: 31.2px;
+  cursor: pointer;
+  box-shadow: 0px 0px 1.1px #000000, 0px 0px 0px #0d0d0d;
+  background: #46262c;
+  border-radius: 0px;
+  border: 0px solid #010101;
+}
+input[type=range]::-webkit-slider-thumb {
+  box-shadow: 1.8px 1.8px 5.9px rgba(255, 0, 0, 0.49), 0px 0px 1.8px rgba(255, 26, 26, 0.49);
+  border: 2.9px solid #941e00;
+  height: 25px;
+  width: 34px;
+  border-radius: 28px;
+  background: rgba(255, 55, 56, 0.93);
+  cursor: pointer;
+  -webkit-appearance: none;
+  margin-top: 3.1px;
+}
+input[type=range]:focus::-webkit-slider-runnable-track {
+  background: #572f36;
+}
+input[type=range]::-moz-range-track {
+  width: 100%;
+  height: 31.2px;
+  cursor: pointer;
+  box-shadow: 0px 0px 1.1px #000000, 0px 0px 0px #0d0d0d;
+  background: #46262c;
+  border-radius: 0px;
+  border: 0px solid #010101;
+}
+input[type=range]::-moz-range-thumb {
+  box-shadow: 1.8px 1.8px 5.9px rgba(255, 0, 0, 0.49), 0px 0px 1.8px rgba(255, 26, 26, 0.49);
+  border: 2.9px solid #941e00;
+  height: 25px;
+  width: 34px;
+  border-radius: 28px;
+  background: rgba(255, 55, 56, 0.93);
+  cursor: pointer;
+}
+input[type=range]::-ms-track {
+  width: 100%;
+  height: 31.2px;
+  cursor: pointer;
+  background: transparent;
+  border-color: transparent;
+  color: transparent;
+}
+input[type=range]::-ms-fill-lower {
+  background: #351d22;
+  border: 0px solid #010101;
+  border-radius: 0px;
+  box-shadow: 0px 0px 1.1px #000000, 0px 0px 0px #0d0d0d;
+}
+input[type=range]::-ms-fill-upper {
+  background: #46262c;
+  border: 0px solid #010101;
+  border-radius: 0px;
+  box-shadow: 0px 0px 1.1px #000000, 0px 0px 0px #0d0d0d;
+}
+input[type=range]::-ms-thumb {
+  box-shadow: 1.8px 1.8px 5.9px rgba(255, 0, 0, 0.49), 0px 0px 1.8px rgba(255, 26, 26, 0.49);
+  border: 2.9px solid #941e00;
+  width: 34px;
+  border-radius: 28px;
+  background: rgba(255, 55, 56, 0.93);
+  cursor: pointer;
+  height: 25px;
+}
+input[type=range]:focus::-ms-fill-lower {
+  background: #46262c;
+}
+input[type=range]:focus::-ms-fill-upper {
+  background: #572f36;
 }
     </style>
   </head>
 
   <body>
+    <div class="version row">
+      <div>
+        gifstopmotion
+      </div>
+      <div class="noflex">
+        <a href="https://github.com/rwos/gifstopmotion">v100.0</a>
+      </div>
+    </div>
     <canvas id="tmp" style="display:none"></canvas>
-    <table class="main">
-      <tr>
-        <td width="50%">
-          <div>
-            <div class="overlay">
-              <canvas class="fg-2 transparent" id="lastframe"></canvas>
-              <video class="fg" id="viewfinder">Please browser your update.</video>
-              <div class="bg instructions">enable your camera</div>
-            </div>
-          </div>
-        </td>
-        <td width="50%">
-          <div>
-            <div class="overlay">
-              <img class="fg" id="preview" height="1" src="data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==">
-              <div class="hover">
-                <button id="save" class="disabled">download</button>
-                <button id="clear">start over</button>
-              </div>
-              <div class="bg instructions">press space a lot</div>
-            </div>
-          </div>
-        </td>
-      </tr>
-      <tr>
-        <td colspan="2">
+    <div class="main">
+      <div class="preview row">
+        <div class="overlay">
+          <canvas class="fg-2 transparent" id="lastframe"></canvas>
+          <video class="fg" id="viewfinder">Please browser your update.</video>
+          <div class="bg instructions">enable your camera</div>
+        </div>
+        <div class="divider"></div>
+        <div class="overlay">
+          <img class="fg" id="preview" height="1" src="data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==">
+          <div class="bg instructions">press space a lot</div>
+        </div>
+      </div>
+      <div class="controls row">
+        <div class="col">
+          <button id="capture">CAPTURE</button>
           <textarea id="text" placeholder="caption (optional)"></textarea>
-          <button class="disabled" id="greenscreen">make the current frame transparent (experimental)</button>
-        </td>
-      </tr>
-      <tr>
-        <td colspan="2">
-          <div class="disabled" id="framecontainer"></div>
-        </td>
-      </tr>
-    </table>
-    <div id="debug" class="disabled"></div>
-    <input style="display: none" id="delay" type="range" min="10" max="500" step="10" value="200" />
-    <div class="version">
-      <a href="https://github.com/rwos/gifstopmotion">v85.0</a>
+          <button style="display:none" class="disabled" id="greenscreen">greenscreen (do not use)</button>
+        </div>
+        <div class="divider"></div>
+        <div class="col">
+          <div class="row">
+            <label for="delay" class="noflex">
+              slowness&nbsp;
+            </label>
+            <input id="delay" name="delay" type="range" min="10" max="500" step="10" value="200" />
+          </div>
+          <div class="row">
+            <button id="save" class="disabled">download</button>
+            &nbsp;
+            <button id="clear">start over</button>
+          </div>
+        </div>
+      </div>
+      <div class="frames row" id="framecontainer"></div>
     </div>
   </body>
 </html>
