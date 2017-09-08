@@ -134,6 +134,13 @@
                 ev.preventDefault();
             }
         }, false);
+
+        var updateLastFrameSize = function() {
+            ELEMENT.lastframe.style.width = ELEMENT.video.scrollWidth + 'px';
+            ELEMENT.lastframe.style.height = ELEMENT.video.scrollHeight + 'px';
+            window.requestAnimationFrame(updateLastFrameSize);
+        };
+        window.requestAnimationFrame(updateLastFrameSize);
     }
 
     // main stuff
@@ -185,6 +192,8 @@
         if (width && height) {
             ELEMENT.canvas.width = width;
             ELEMENT.canvas.height = height;
+            ELEMENT.lastframe.width = width;
+            ELEMENT.lastframe.height = height;
 
             // prepare frame
             context.drawImage(ELEMENT.video, 0, 0, width, height);
@@ -217,7 +226,7 @@
                 context.drawImage(ELEMENT.video, 0, 0, width, height);
                 context.globalCompositeOperation = 'source-over';
             }
-            Utils.addCaption(context, ELEMENT.text.value);
+            Utils.addCaption(context, ELEMENT.text.value, width, height);
 
             // update transparent last frame overlay
             STORE.dispatch({

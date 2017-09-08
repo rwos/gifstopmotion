@@ -857,13 +857,13 @@ Utils.clonecanvas = function(oldcanvas) {
     return newcanvas;
 };
 
-Utils.addCaption = function(context, text) {
+Utils.addCaption = function(context, text, width, height) {
     context.textAlign = 'center';
     context.font = 'bold 24px sans';
     context.fillStyle = 'white';
     context.strokeStyle = '1px solid black';
-    context.fillText(text, context.width/2, context.height-24);
-    context.strokeText(text, context.width/2, context.height-24);
+    context.fillText(text, width/2, height-24);
+    context.strokeText(text, width/2, height-24);
 };
 /*
     Copyright 2015 by Richard Wossal <richard@r-wos.org>
@@ -1001,6 +1001,13 @@ Utils.addCaption = function(context, text) {
                 ev.preventDefault();
             }
         }, false);
+
+        var updateLastFrameSize = function() {
+            ELEMENT.lastframe.style.width = ELEMENT.video.scrollWidth + 'px';
+            ELEMENT.lastframe.style.height = ELEMENT.video.scrollHeight + 'px';
+            window.requestAnimationFrame(updateLastFrameSize);
+        };
+        window.requestAnimationFrame(updateLastFrameSize);
     }
 
     // main stuff
@@ -1052,6 +1059,8 @@ Utils.addCaption = function(context, text) {
         if (width && height) {
             ELEMENT.canvas.width = width;
             ELEMENT.canvas.height = height;
+            ELEMENT.lastframe.width = width;
+            ELEMENT.lastframe.height = height;
 
             // prepare frame
             context.drawImage(ELEMENT.video, 0, 0, width, height);
@@ -1084,7 +1093,7 @@ Utils.addCaption = function(context, text) {
                 context.drawImage(ELEMENT.video, 0, 0, width, height);
                 context.globalCompositeOperation = 'source-over';
             }
-            Utils.addCaption(context, ELEMENT.text.value);
+            Utils.addCaption(context, ELEMENT.text.value, width, height);
 
             // update transparent last frame overlay
             STORE.dispatch({
@@ -1495,7 +1504,7 @@ input[type=range]:focus::-ms-fill-upper {
         gifstopmotion
       </div>
       <div class="noflex">
-        <a href="https://github.com/rwos/gifstopmotion">v99.0</a>
+        <a href="https://github.com/rwos/gifstopmotion">v100.0</a>
       </div>
     </div>
     <canvas id="tmp" style="display:none"></canvas>
