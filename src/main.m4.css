@@ -55,13 +55,31 @@
 
 /*** style ***/
 
-define(COLOR_GLOW_1, rgba(255, 55, 56, 0.93))
-define(COLOR_GLOW_2, yellow)
-define(RADIUS_LARGE, border-radius: 8px)
+changequote(`[[',`]]') /* ] <-- make vim syntax highlighting behave */
+
+define(COLOR_GLOW_1, [[rgba(255, 55, 56, 0.93)]])
+define(COLOR_GLOW_1_HOVER, [[rgba(255, 125, 126, 0.93)]])
+define(COLOR_GLOW_2, orange)
+define(COLOR_GLOW_2_HOVER, yellow)
+
+define(SHADOW_GLOW_1, [[1.8px 1.8px 5.9px rgba(255, 0, 0, 0.49), 0px 0px 1.8px rgba(255, 26, 26, 0.49)]])
+define(SHADOW_INSET, [[box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.5), inset 0 -2px 2px rgba(0, 0, 0, 0.5)]])
+
+define(RADIUS_LARGE, border-radius: 5px)
 define(RADIUS_SMALL, border-radius: 3px)
 
-define(TEXT_GLOW_1, color: GLOW_1;
-                 text-shadow: 1.8px 1.8px 5.9px rgba(255, 0, 0, 0.49), 0px 0px 1.8px rgba(255, 26, 26, 0.49))
+define(TEXT_GLOW_1, [[
+    color: COLOR_GLOW_1;
+    text-shadow: SHADOW_GLOW_1]])
+define(TEXT_GLOW_1_HOVER, [[
+    color: COLOR_GLOW_1_HOVER;
+    text-shadow: SHADOW_GLOW_1]])
+define(TEXT_GLOW_2, [[
+    color: COLOR_GLOW_2;
+    text-shadow: 0 -1px 0 yellow, 0 0px 30px yellow, 0 0px 50px yellow]])
+define(TEXT_GLOW_2_HOVER, [[
+    color: COLOR_GLOW_2_HOVER;
+    text-shadow: 0 -1px 0 yellow, 0 0px 30px yellow, 0 0px 50px yellow]])
 
 .transparent {
     opacity: 0.5;
@@ -88,6 +106,9 @@ body {
 .version.row * {
     TEXT_GLOW_1;
 }
+.version.row * a:hover {
+    TEXT_GLOW_1_HOVER;
+}
 
 .preview img, .preview video, .preview canvas {
     RADIUS_LARGE;
@@ -113,7 +134,7 @@ body {
     background: rgba(0, 0, 0, 0.5);
     border-top: 1px solid #999;
     border-bottom: 1px solid #aaa;
-    box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.5), inset 0 -2px 2px rgba(0, 0, 0, 0.5);
+    SHADOW_INSET;
 }
 
 .row.frames img {
@@ -150,7 +171,7 @@ body {
 }
 
 .remove-frame:hover:after {
-    text-shadow: 1.8px 1.8px 5.9px rgba(255, 0, 0, 0.49), 0px 0px 1.8px rgba(255, 26, 26, 0.49);
+    text-shadow: SHADOW_GLOW_1;
     color: rgba(0, 0, 0, 0.7);
     content: 'remove';
 }
@@ -161,6 +182,7 @@ textarea {
     border: 0px solid #010101;
     padding: 20px;
     TEXT_GLOW_1;
+    SHADOW_INSET;
 }
 
 /*** button stuff partly based on https://codepen.io/wallas/full/lFABr/ ***/
@@ -194,8 +216,7 @@ button:after {
 }
 
 button:hover {
-    color: orange;
-    text-shadow: 0 -1px 0 yellow, 0 0px 30px yellow, 0 0px 50px yellow;
+    TEXT_GLOW_2;
 }
 
 button:hover:after {
@@ -204,9 +225,8 @@ button:hover:after {
 }
 
 button:active {
-    color: yellow;
-    text-shadow: 0 -1px 0 yellow, 0 0px 30px yellow, 0 0px 50px yellow;
     box-shadow: 0 -1px 0 rgba(255, 193,0, 0.2), 0 0 0 1px rgba(0, 0, 0, 0.4), 0 1px 0 rgba(255, 255, 255, 0.05), 0 0 20px rgba(255, 193,0, 0.1), 0 0 30px rgba(255, 193,0, 0.1);
+    TEXT_GLOW_2_HOVER;
 }
 
 button:active:after {
@@ -215,90 +235,54 @@ button:active:after {
     box-shadow: inset 0 5px 6px rgba(0, 0, 0, 0.3), inset 0 0 4px rgba(0, 0, 0, 0.9), 0 0 0 black;
 }
 
-/*** range style - via http://danielstern.ca/range.css/#/ ***/
+/*** range style - based on sth from http://danielstern.ca/range.css/#/ ***/
 
 input[type=range] {
-  -webkit-appearance: none;
-  width: 100%;
-  height: 20px;
-}
-input[type=range]:focus {
-  outline: none;
-}
-input[type=range]::-webkit-slider-runnable-track {
-  width: 100%;
-  height: 31.2px;
-  cursor: pointer;
-  box-shadow: 0px 0px 1.1px #000000, 0px 0px 0px #0d0d0d;
-  background: #46262c;
-  border-radius: 0px;
-  border: 0px solid #010101;
-}
-input[type=range]::-webkit-slider-thumb {
-  box-shadow: 1.8px 1.8px 5.9px rgba(255, 0, 0, 0.49), 0px 0px 1.8px rgba(255, 26, 26, 0.49);
-  border: 2.9px solid #941e00;
-  height: 25px;
-  width: 34px;
-  RADIUS_LARGE;
-  background: rgba(255, 55, 56, 0.93);
-  cursor: pointer;
-  -webkit-appearance: none;
-  margin-top: 3.1px;
-}
-input[type=range]:focus::-webkit-slider-runnable-track {
-  background: #572f36;
-}
-input[type=range]::-moz-range-track {
-  width: 100%;
-  height: 31.2px;
-  cursor: pointer;
-  box-shadow: 0px 0px 1.1px #000000, 0px 0px 0px #0d0d0d;
-  background: #46262c;
-  border-radius: 0px;
-  border: 0px solid #010101;
-}
-input[type=range]::-moz-range-thumb {
-  box-shadow: 1.8px 1.8px 5.9px rgba(255, 0, 0, 0.49), 0px 0px 1.8px rgba(255, 26, 26, 0.49);
-  border: 2.9px solid #941e00;
-  height: 25px;
-  width: 34px;
-  RADIUS_LARGE;
-  background: rgba(255, 55, 56, 0.93);
-  cursor: pointer;
-}
-input[type=range]::-ms-track {
-  width: 100%;
-  height: 31.2px;
-  cursor: pointer;
-  background: transparent;
-  border-color: transparent;
-  color: transparent;
-}
-input[type=range]::-ms-fill-lower {
-  background: #351d22;
-  border: 0px solid #010101;
-  border-radius: 0px;
-  box-shadow: 0px 0px 1.1px #000000, 0px 0px 0px #0d0d0d;
-}
-input[type=range]::-ms-fill-upper {
-  background: #46262c;
-  border: 0px solid #010101;
-  border-radius: 0px;
-  box-shadow: 0px 0px 1.1px #000000, 0px 0px 0px #0d0d0d;
-}
-input[type=range]::-ms-thumb {
-  box-shadow: 1.8px 1.8px 5.9px rgba(255, 0, 0, 0.49), 0px 0px 1.8px rgba(255, 26, 26, 0.49);
-  border: 2.9px solid #941e00;
-  width: 34px;
-  RADIUS_LARGE;
-  background: rgba(255, 55, 56, 0.93);
-  cursor: pointer;
-  height: 25px;
-}
-input[type=range]:focus::-ms-fill-lower {
-  background: #46262c;
-}
-input[type=range]:focus::-ms-fill-upper {
-  background: #572f36;
+    -webkit-appearance: none;
+    width: 100%;
+    height: 20px;
 }
 
+input[type=range]:focus {
+    outline: none;
+}
+
+define(RANGE_TRACK_STYLE, [[
+    width: 100%;
+    height: 31.2px;
+    cursor: pointer;
+    box-shadow: 0px 0px 1.1px #000000, 0px 0px 0px #0d0d0d;
+    background: #46262c;
+    RADIUS_LARGE;
+    SHADOW_INSET;
+    border: 0px solid #010101]])
+
+define(RANGE_THUMB_STYLE, [[
+    box-shadow: SHADOW_GLOW_1;
+    border: 2.9px solid #941e00;
+    height: 25px;
+    width: 34px;
+    RADIUS_LARGE;
+    background: COLOR_GLOW_1;
+    cursor: pointer;
+    -webkit-appearance: none;
+    margin-top: 3.1px]])
+
+input[type=range]::-webkit-slider-runnable-track {
+    RANGE_TRACK_STYLE;
+}
+input[type=range]::-moz-range-track {
+    RANGE_TRACK_STYLE;
+}
+input[type=range]::-webkit-slider-thumb {
+    RANGE_THUMB_STYLE;
+}
+input[type=range]::-moz-range-thumb {
+    RANGE_THUMB_STYLE;
+}
+input[type=range]::-webkit-slider-thumb:hover {
+    background: COLOR_GLOW_1_HOVER;
+}
+input[type=range]::-moz-range-thumb:hover {
+    background: COLOR_GLOW_1_HOVER;
+}
