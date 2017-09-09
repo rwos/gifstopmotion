@@ -159,10 +159,10 @@ body {
     text-align: right;
     position: absolute;
     width: 120px;
+    height: 100%;
 }
 
-.remove-frame:after {
-    content: 'X';
+.remove-frame * {
     color: rgba(255,255,255,0.5);
 }
 
@@ -170,10 +170,9 @@ body {
     background: rgba(255, 55, 56, 0.5);
 }
 
-.remove-frame:hover:after {
+.remove-frame:hover * {
     text-shadow: SHADOW_GLOW_1;
     color: rgba(0, 0, 0, 0.7);
-    content: 'remove';
 }
 
 textarea {
@@ -215,7 +214,7 @@ button:after {
     RADIUS_SMALL;
 }
 
-button:hover {
+button:hover, button:hover * {
     TEXT_GLOW_2;
 }
 
@@ -224,7 +223,7 @@ button:hover:after {
     background-image: linear-gradient(#999, #555);
 }
 
-button:active {
+button:active, button:active * {
     box-shadow: 0 -1px 0 rgba(255, 193,0, 0.2), 0 0 0 1px rgba(0, 0, 0, 0.4), 0 1px 0 rgba(255, 255, 255, 0.05), 0 0 20px rgba(255, 193,0, 0.1), 0 0 30px rgba(255, 193,0, 0.1);
     TEXT_GLOW_2_HOVER;
 }

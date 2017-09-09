@@ -6,6 +6,8 @@ watch:
 	while true; do $(MAKE) local.html ; sleep 0.5; done
 
 build: docs/index.html
+	rm -rf docs/font-awesome
+	cp -R 3rd/node_modules/font-awesome docs
 
 local.css: src/main.m4.css
 	m4 $^ > $@

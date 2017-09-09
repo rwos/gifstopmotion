@@ -259,6 +259,7 @@
         var remove = Utils.makeElement('a', {
             'class': 'remove-frame',
         });
+        remove.innerHTML = '<i class="fa fa-trash" aria-hidden="true"></i>';
         remove.addEventListener('click', function() {
             STORE.dispatch({
                 type: 'FRAME_REMOVE',
