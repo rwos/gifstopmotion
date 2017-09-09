@@ -271,7 +271,8 @@
             'class': 'frame'
         });
         var imgContainer = Utils.makeElement('div', {
-            'data-frame': frameId
+            'data-frame': frameId,
+            'class': 'frame-container'
         });
         imgContainer.appendChild(remove);
         imgContainer.appendChild(img);
