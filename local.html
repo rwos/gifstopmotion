@@ -1274,6 +1274,13 @@ Utils.addCaption = function(context, text, width, height) {
 
 /*** style ***/
 
+
+
+
+
+
+
+
 .transparent {
     opacity: 0.5;
 }
@@ -1297,8 +1304,8 @@ body {
 }
 
 .version.row * {
-    color: rgba(255, 55, 56, 0.93);
-    text-shadow: 1.8px 1.8px 5.9px rgba(255, 0, 0, 0.49), 0px 0px 1.8px rgba(255, 26, 26, 0.49);
+    color: GLOW_1;
+                 text-shadow: 1.8px 1.8px 5.9px rgba(255, 0, 0, 0.49);
 }
 
 .preview img, .preview video, .preview canvas {
@@ -1372,8 +1379,8 @@ textarea {
     border-radius: 8px;
     border: 0px solid #010101;
     padding: 20px;
-    text-shadow: 1.8px 1.8px 5.9px rgba(255, 0, 0, 0.49), 0px 0px 1.8px rgba(255, 26, 26, 0.49);
-    color: rgba(255, 55, 56, 0.93);
+    color: GLOW_1;
+                 text-shadow: 1.8px 1.8px 5.9px rgba(255, 0, 0, 0.49);
 }
 
 /*** button stuff partly based on https://codepen.io/wallas/full/lFABr/ ***/
@@ -1403,7 +1410,7 @@ button:after {
     position: absolute;
     background-image: linear-gradient(#666, #555);
     box-shadow: inset 0 2px 1px -1px rgba(255, 255, 255, 0.2), inset 0 -2px 1px -1px rgba(0, 0, 0, 0.2), 0 12px 12px rgba(0, 0, 0, 0.5), 0 4px 6px rgba(0, 0, 0, 0.3);
-    border-radius: 2px;
+    border-radius: 3px;
 }
 
 button:hover {
@@ -1452,7 +1459,7 @@ input[type=range]::-webkit-slider-thumb {
   border: 2.9px solid #941e00;
   height: 25px;
   width: 34px;
-  border-radius: 28px;
+  border-radius: 8px;
   background: rgba(255, 55, 56, 0.93);
   cursor: pointer;
   -webkit-appearance: none;
@@ -1475,7 +1482,7 @@ input[type=range]::-moz-range-thumb {
   border: 2.9px solid #941e00;
   height: 25px;
   width: 34px;
-  border-radius: 28px;
+  border-radius: 8px;
   background: rgba(255, 55, 56, 0.93);
   cursor: pointer;
 }
@@ -1503,7 +1510,7 @@ input[type=range]::-ms-thumb {
   box-shadow: 1.8px 1.8px 5.9px rgba(255, 0, 0, 0.49), 0px 0px 1.8px rgba(255, 26, 26, 0.49);
   border: 2.9px solid #941e00;
   width: 34px;
-  border-radius: 28px;
+  border-radius: 8px;
   background: rgba(255, 55, 56, 0.93);
   cursor: pointer;
   height: 25px;
@@ -1524,7 +1531,7 @@ input[type=range]:focus::-ms-fill-upper {
         gifstopmotion
       </div>
       <div class="noflex">
-        <a href="https://github.com/rwos/gifstopmotion">v109.0</a>
+        <a href="https://github.com/rwos/gifstopmotion">v110.0</a>
       </div>
     </div>
     <canvas id="tmp" style="display:none"></canvas>
