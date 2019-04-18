@@ -31,7 +31,7 @@ Utils.getElements = function(spec) {
 };
 
 Utils.initCamera = function(videoElement) {
-    navigator.getMedia = (navigator.getUserMedia
+    navigator.getMedia = (navigator.mediaDevices.getUserMedia
                        || navigator.webkitGetUserMedia
                        || navigator.mozGetUserMedia
                        || navigator.msGetUserMedia);

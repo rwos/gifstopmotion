@@ -5,6 +5,9 @@ gifstopmotion
 
 ## hacking
 
+Since all browsers are shit, you can't actually run this locally anymore.
+It used to work like this:
+
 * do `make watch`
 * in another terminal, do `make run`
 * edit the sources (in `src/`)
