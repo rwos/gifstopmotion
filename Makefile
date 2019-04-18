@@ -15,6 +15,7 @@ local.css: src/main.m4.css
 	m4 $^ > $@
 
 local.html: src/index.html src/*.js local.css Makefile
+	@echo VERSION: $(shell git log --oneline | wc -l)
 	sed -e '/INCLUDE JS/{r 3rd/node_modules/gif.js/dist/gif.js' \
 	    -e 'r 3rd/node_modules/redux/dist/redux.js' \
 		-e 'r src/utils.js' \

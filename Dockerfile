@@ -1,3 +1,3 @@
 FROM alpine
 
-RUN apk add -u make bash python
+RUN apk add -u make bash python git
