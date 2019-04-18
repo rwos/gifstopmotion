@@ -31,19 +31,33 @@ Utils.getElements = function(spec) {
 };
 
 Utils.initCamera = function(videoElement) {
-    navigator.getMedia = (navigator.mediaDevices.getUserMedia
-                       || navigator.webkitGetUserMedia
-                       || navigator.mozGetUserMedia
-                       || navigator.msGetUserMedia);
-    navigator.getMedia({video: true, audio: false}, function(stream) {
-        if (navigator.mozGetUserMedia) {
-            videoElement.mozSrcObject = stream;
-        } else {
-            var vendorURL = window.URL || window.webkitURL;
-            videoElement.src = vendorURL.createObjectURL(stream);
-        }
-        videoElement.play();
-    }, console.log);
+    if (!navigator.mediaDevices.getUserMedia) {
+        // old shit
+        navigator.getMedia = (navigator.getUserMedia
+                           || navigator.webkitGetUserMedia
+                           || navigator.mozGetUserMedia
+                           || navigator.msGetUserMedia);
+        navigator.getMedia({video: true, audio: false}, function(stream) {
+            if (navigator.mozGetUserMedia) {
+                videoElement.mozSrcObject = stream;
+            } else {
+                var vendorURL = window.URL || window.webkitURL;
+                videoElement.src = vendorURL.createObjectURL(stream);
+            }
+            videoElement.play();
+        }, console.log);
+    } else {
+        // new, improved shit
+        navigator.mediaDevices.getUserMedia({video: true, audio: false})
+        .then(function(stream) {
+            videoElement.srcObject = stream
+            videoElement.play();
+        })
+        .catch(function(err) {
+            console.log(err)
+        });
+
+    }
 };
 
 Utils.clonecanvas = function(oldcanvas) {
