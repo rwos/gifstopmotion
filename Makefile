@@ -30,3 +30,6 @@ docs/index.html: local.html
 
 run:
 	xdg-open http://localhost:8000 || open http://localhost:8000
+
+deps:
+	cd 3rd && yarn install
